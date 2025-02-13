@@ -7,5 +7,5 @@ from .models import Empleados, Perfiles
 class EmpleadoForm(forms.ModelForm):
     class Meta:
         model = Empleados
-        fields = ['id_empleado', 'nombre', 'apellido', 'departamento', 'cargo', 'id_perfil']
+        fields = ['id_empleado', 'nombre', 'apellido', 'departamento', 'cargo', 'perfil']
 
