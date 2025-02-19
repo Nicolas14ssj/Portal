@@ -36,11 +36,10 @@ class Perfiles(models.Model):
         return self.id_perfil
 
 class Empleados (models.Model): 
-    id_empleado = models.CharField(primary_key = True, max_length =30)
+    id_empleado = models.CharField(primary_key = True, max_length =60)
     nombre = models.CharField(max_length =60)
     apellido = models.CharField(max_length =60)
     departamento = models.CharField(max_length =30)
-    cargo = models.CharField(max_length =60)
     perfil = models.ForeignKey(Perfiles, on_delete=models.PROTECT, related_name='empleados', default=1)  
     def __str__(self):
         return self.id_empleado 
@@ -60,7 +59,7 @@ class Estado (models.Model):
 class Rel_Perfiles_Modulos (models.Model):
     track_id  = models.IntegerField(primary_key = True)
     id_detalle_mod = models.ForeignKey(DetalleModulo, on_delete=models.PROTECT, related_name='Iddm')
-    name = models.CharField(max_length =30,)
+    name = models.CharField(max_length =120,)
     parent_id = models.IntegerField()
     order = models.IntegerField()
     id_perfil = models.ForeignKey(Perfiles,  on_delete=models.PROTECT, related_name='E', null=True, default=None)
@@ -76,7 +75,8 @@ class Rel_Perfiles_Modulos (models.Model):
 #MER
 class OITM(models.Model):  # Maestro de Articulos
     Itemcode = models.IntegerField(primary_key=True)  # NUMERO DE ARTICULO
-    ItemName = models.CharField(max_length=60)  # NOMBRE DE ARTICULO 
+    ItemName = models.CharField(max_length=120)  # NOMBRE DE ARTICULO 
+    ItmsGrpCod = models.IntegerField() # Grupo de articulos
     
     def __str__(self):
         return str(self.Itemcode)
@@ -85,8 +85,8 @@ class OITM(models.Model):  # Maestro de Articulos
 
 class ORTT(models.Model):  # maestro de tipo de cambio
     RateDate = models.DateTimeField(auto_now_add=False)  # FECHA DE TIPO DE CAMBIO
-    Currency = models.CharField(max_length=60, primary_key=True)  # CODIGO DE MONETA
-    Rate = models.CharField(max_length=40)  # TIPO DE CAMBIO
+    Currency = models.CharField(max_length=120, primary_key=True)  # CODIGO DE MONETA
+    Rate = models.CharField(max_length=120)  # TIPO DE CAMBIO
     
     def __str__(self):
         return self.Currency
@@ -96,6 +96,9 @@ class ORTT(models.Model):  # maestro de tipo de cambio
 class OITW(models.Model):  # STOCK x bodega
     Itemcode = models.ForeignKey(OITM, on_delete=models.PROTECT, related_name='n_items')  # NUMERO DE ARTICULO
     OnHand = models.IntegerField()  # EN STOCK 
+    WhsCode = models.CharField(max_length=120)
+    AvgPrice =  models.DecimalField(max_digits=10, decimal_places=4) # precio promedio
+    
 
     def __str__(self):
         return str(self.Itemcode)
@@ -103,9 +106,10 @@ class OITW(models.Model):  # STOCK x bodega
     
 
 class OWHS(models.Model):  # maestro de BODEGA
-    WhsCode = models.CharField(max_length=60, primary_key=True)  # CODIGO DE ALMACEN 
+    WhsCode = models.CharField(max_length=120, primary_key=True)  # CODIGO DE ALMACEN 
     Itemcode = models.ForeignKey(OITM, on_delete=models.PROTECT, related_name='warehouse_items')  # NUMERO DE ARTICULO
     OnHand = models.IntegerField()  # EN STOCK 
+    WhsName = models.CharField(max_length=120)
 
     def __str__(self):
         return self.WhsCode
@@ -119,10 +123,11 @@ class OWHS(models.Model):  # maestro de BODEGA
 
 
 class OCRD(models.Model):  # maestro de socios de negocios  
-    CardCode = models.CharField(max_length=60, primary_key=True)  # CODIGO SN 
-    CardName = models.CharField(max_length=60)  # NOMBRE SN  
-    CardType = models.CharField(max_length=60, default='No especifico')  # Tipo de socio de necogio   
-    validFor = models.CharField(max_length=60)  # ACTIVO 
+    CardCode = models.CharField(max_length=120, primary_key=True)  # CODIGO SN 
+    CardName = models.CharField(max_length=120)  # NOMBRE SN  
+    CardType = models.CharField(max_length=120, default='No especifico')  # Tipo de socio de necogio   
+    validFor = models.CharField(max_length=120)  # ACTIVO
+    GroupCode = models.IntegerField() # CODIGO DE GRUPO  
     
     def __str__(self):
         return self.CardCode 
@@ -130,13 +135,13 @@ class OCRD(models.Model):  # maestro de socios de negocios
     
      
 class OINV(models.Model):  # cabecera de documentos de venta (FACTURA nota de debito - factura reserva-boleta etc) 
-    DocNum = models.CharField(max_length=60, primary_key=True)  # NUMERO DE DOCUMENTO
+    DocNum = models.CharField(max_length=120, primary_key=True)  # NUMERO DE DOCUMENTO
     DocTotal = models.DecimalField(max_digits=10, decimal_places=2)  # total factura
     VatSum = models.DecimalField(max_digits=10, decimal_places=2)  # IMPUESTO TOTAL 
     CardCode = models.ForeignKey(OCRD, on_delete=models.PROTECT, related_name='invoices')  # Codgo de cliente/proveedor
     DocDate = models.DateTimeField(auto_now_add=False)  # fecha de contabilizacion 
     DiscPrcnt = models.DecimalField(max_digits=10, decimal_places=2)  # % DE DESCUENTO PARA DOCUMENTO 
-    ObjType = models.CharField(max_length=50)  # TIPO DE OBJETO 
+    ObjType = models.CharField(max_length=120)  # TIPO DE OBJETO 
     OCRD_CardCode = models.ForeignKey(OCRD,  on_delete=models.PROTECT, related_name='C', null=True, default=None) 
            
     def __str__(self):
@@ -145,14 +150,14 @@ class OINV(models.Model):  # cabecera de documentos de venta (FACTURA nota de de
     
     
 class INV1(models.Model):  # DETALLE del documento de venta
-    DocEntry = models.CharField(max_length=60, primary_key=True)  # NUMERO INTERNO DE DOCUMENTO 
+    DocEntry = models.CharField(max_length=120, primary_key=True)  # NUMERO INTERNO DE DOCUMENTO 
     Itemcode = models.IntegerField()  # NUMERO DE ARTICULO
     Quantity = models.IntegerField()  # CANTIDAD
     LineTotal = models.IntegerField()  # TOTAL DE LINEAS
-    GrossBuyPr = models.DecimalField(max_digits=10, decimal_places=2)  # PRECIO DE COSTE INGRESO BRUTO
-    BaseEntry = models.CharField(max_length=50)  # ID INTERNO DE DOCUMENTO BASE
-    BaseType = models.CharField(max_length=50)  # CLASE DE DOCUMENTO BASE
-    TrgetEntry = models.CharField(max_length=50)  # ID INTERNO DE DOCUMENTO DE DESTINO
+    GrossBuyPr = models.DecimalField(max_digits=10, decimal_places=4)  # PRECIO DE COSTE INGRESO BRUTO
+    BaseEntry = models.CharField(max_length=120)  # ID INTERNO DE DOCUMENTO BASE
+    BaseType = models.CharField(max_length=120)  # CLASE DE DOCUMENTO BASE
+    TrgetEntry = models.CharField(max_length=120)  # ID INTERNO DE DOCUMENTO DE DESTINO
     DoCnum = models.ForeignKey(OINV, on_delete=models.PROTECT, related_name='nd', null=True, default=None) 
     OITM_ItemCode = models.ForeignKey(OITM,  on_delete=models.PROTECT, related_name='OP', null=True, default=None) 
     
@@ -164,10 +169,10 @@ class INV1(models.Model):  # DETALLE del documento de venta
 class OQUT(models.Model):  # COTIZACION (QUT1)
     DocTotal = models.DecimalField(max_digits=10, decimal_places=2)  # total factura
     VatSum = models.DecimalField(max_digits=10, decimal_places=2)  # IMPUESTO TOTAL 
-    CardCode = models.CharField(max_length=60)  # CODIGO SN 
+    CardCode = models.CharField(max_length=120)  # CODIGO SN 
     DocDate = models.DateTimeField()  # fecha de contabilizacion 
     DiscPrcnt = models.DecimalField(max_digits=10, decimal_places=2)  # % DE DESCUENTO PARA DOCUMENTO 
-    DocEntry = models.CharField(max_length=60, primary_key=True, default='0')  # NUMERO INTERNO DE DOCUMENTO 
+    DocEntry = models.CharField(max_length=120, primary_key=True, default='0')  # NUMERO INTERNO DE DOCUMENTO 
     ObjType = models.CharField(max_length=50)  # TIPO DE OBJETO 
     OCRD_CardCode = models.ForeignKey(OCRD,  on_delete=models.PROTECT, related_name='CI', null=True, default=None) 
            
@@ -179,14 +184,14 @@ class OQUT(models.Model):  # COTIZACION (QUT1)
     
     
 class QUT1(models.Model):  # DETALLE 
-    DocEntry = models.CharField(max_length=60, primary_key=True, default='None')  # NÚMERO INTERNO DE DOCUMENTO 
+    DocEntry = models.CharField(max_length=120, primary_key=True, default='None')  # NÚMERO INTERNO DE DOCUMENTO 
     Itemcode = models.IntegerField()  # NÚMERO DE ARTÍCULO
     Quantity = models.IntegerField()  # CANTIDAD
     LineTotal = models.IntegerField()  # TOTAL DE LÍNEAS
     GrossBuyPr = models.DecimalField(max_digits=10, decimal_places=2)  # PRECIO DE COSTE INGRESO BRUTO
-    BaseEntry = models.CharField(max_length=50)  # ID INTERNO DE DOCUMENTO BASE
-    BaseType = models.CharField(max_length=50)  # CLASE DE DOCUMENTO BASE
-    TrgetEntry = models.CharField(max_length=50)  # ID INTERNO DE DOCUMENTO DE DESTINO
+    BaseEntry = models.CharField(max_length=120)  # ID INTERNO DE DOCUMENTO BASE
+    BaseType = models.CharField(max_length=120)  # CLASE DE DOCUMENTO BASE
+    TrgetEntry = models.CharField(max_length=120)  # ID INTERNO DE DOCUMENTO DE DESTINO
     OQUT_DocEntry = models.ForeignKey(OQUT, on_delete=models.PROTECT, related_name='qut1_entries',  null=True, default=None)  # Cambiado a OQUT_DocEntry para evitar confusión
     OITM_ItemCode = models.ForeignKey(OITM,  on_delete=models.PROTECT, related_name='OE', null=True, default=None) 
     
@@ -198,11 +203,11 @@ class QUT1(models.Model):  # DETALLE
 class ORDR(models.Model):  # PEDIDOS (RDR1)
     DocTotal = models.DecimalField(max_digits=10, decimal_places=2)  # total factura
     VatSum = models.DecimalField(max_digits=10, decimal_places=2)  # IMPUESTO TOTAL 
-    CardCode = models.CharField(max_length=60, )  # CODIGO SN 
+    CardCode = models.CharField(max_length=120, )  # CODIGO SN 
     DocDate = models.DateTimeField(auto_now_add=False)  # fecha de contabilizacion 
     DiscPrcnt = models.DecimalField(max_digits=10, decimal_places=2)  # % DE DESCUENTO PARA DOCUMENTO 
-    DocEntry = models.CharField(max_length=60, primary_key=True)  # NUMERO INTERNO DE DOCUMENTO 
-    ObjType = models.CharField(max_length=50)  # TIPO DE OBJETO 
+    DocEntry = models.CharField(max_length=120, primary_key=True)  # NUMERO INTERNO DE DOCUMENTO 
+    ObjType = models.CharField(max_length=120)  # TIPO DE OBJETO 
     OCRD_CardCode = models.ForeignKey(OCRD,  on_delete=models.PROTECT, related_name='CO', null=True, default=None) 
            
              
@@ -212,14 +217,14 @@ class ORDR(models.Model):  # PEDIDOS (RDR1)
     
 
 class RDR1(models.Model):  # DETALLE 
-    DocEntry = models.CharField(max_length=60, primary_key=True, default='None')  # NUMERO INTERNO DE DOCUMENTO 
+    DocEntry = models.CharField(max_length=120, primary_key=True, default='None')  # NUMERO INTERNO DE DOCUMENTO 
     Itemcode = models.IntegerField()  # NUMERO DE ARTICULO
     Quantity = models.IntegerField()  # CANTIDAD
     LineTotal = models.IntegerField()  # TOTAL DE LINEAS
     GrossBuyPr = models.DecimalField(max_digits=10, decimal_places=2)  # PRECIO DE COSTE INGRESO BRUTO
-    BaseEntry = models.CharField(max_length=50)  # ID INTERNO DE DOCUMENTO BASE
-    BaseType = models.CharField(max_length=50)  # CLASE DE DOCUMENTO BASE
-    TrgetEntry = models.CharField(max_length=50)  # ID INTERNO DE DOCUMENTO DE DESTINO
+    BaseEntry = models.CharField(max_length=120)  # ID INTERNO DE DOCUMENTO BASE
+    BaseType = models.CharField(max_length=120)  # CLASE DE DOCUMENTO BASE
+    TrgetEntry = models.CharField(max_length=120)  # ID INTERNO DE DOCUMENTO DE DESTINO
     ORDR_DocEntry = models.ForeignKey(ORDR, on_delete=models.PROTECT, related_name='cno', null=True, default=None) 
     OITM_ItemCode = models.ForeignKey(OITM,  on_delete=models.PROTECT, related_name='OI', null=True, default=None)  
     
@@ -231,11 +236,11 @@ class RDR1(models.Model):  # DETALLE
 class ORIN(models.Model):  # NOTA DE CREDITO (RIN1)
     DocTotal = models.DecimalField(max_digits=10, decimal_places=2)  # total factura
     VatSum = models.DecimalField(max_digits=10, decimal_places=2)  # IMPUESTO TOTAL 
-    CardCode = models.CharField(max_length=60, )  # CODIGO SN 
+    CardCode = models.CharField(max_length=120, )  # CODIGO SN 
     DocDate = models.DateTimeField(auto_now_add=False)  # fecha de contabilizacion 
     DiscPrcnt = models.DecimalField(max_digits=10, decimal_places=2)  # % DE DESCUENTO PARA DOCUMENTO 
-    DocEntry = models.CharField(max_length=60, primary_key=True)  # NUMERO INTERNO DE DOCUMENTO 
-    ObjType = models.CharField(max_length=50)  # TIPO DE OBJETO 
+    DocEntry = models.CharField(max_length=120, primary_key=True)  # NUMERO INTERNO DE DOCUMENTO 
+    ObjType = models.CharField(max_length=120)  # TIPO DE OBJETO 
     OCRD_CardCode = models.ForeignKey(OCRD,  on_delete=models.PROTECT, related_name='CD', null=True, default=None) 
            
          
@@ -246,14 +251,14 @@ class ORIN(models.Model):  # NOTA DE CREDITO (RIN1)
 
 
 class RIN1(models.Model): 
-    DocEntry = models.CharField(max_length=60, primary_key=True, default='None')  # NUMERO INTERNO DE DOCUMENTO 
+    DocEntry = models.CharField(max_length=120, primary_key=True, default='None')  # NUMERO INTERNO DE DOCUMENTO 
     Itemcode = models.IntegerField()  # NUMERO DE ARTICULO
     Quantity = models.IntegerField()  # CANTIDAD
     LineTotal = models.IntegerField()  # TOTAL DE LINEAS
     GrossBuyPr = models.DecimalField(max_digits=10, decimal_places=2)  # PRECIO DE COSTE INGRESO BRUTO
-    BaseEntry = models.CharField(max_length=50)  # ID INTERNO DE DOCUMENTO BASE
-    BaseType = models.CharField(max_length=50)  # CLASE DE DOCUMENTO BASE
-    TrgetEntry = models.CharField(max_length=50)  # ID INTERNO DE DOCUMENTO DE DESTINO
+    BaseEntry = models.CharField(max_length=120)  # ID INTERNO DE DOCUMENTO BASE
+    BaseType = models.CharField(max_length=120)  # CLASE DE DOCUMENTO BASE
+    TrgetEntry = models.CharField(max_length=120)  # ID INTERNO DE DOCUMENTO DE DESTINO
     ORIN_DocEntry = models.ForeignKey(ORIN, on_delete=models.PROTECT, related_name='c',  null=True, default=None)  
     OITM_ItemCode = models.ForeignKey(OITM,  on_delete=models.PROTECT, related_name='O', null=True, default=None) 
             

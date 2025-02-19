@@ -80,10 +80,10 @@ DATABASES = {
         'NAME': 'p_portal',
         'USER': 'practica_ti',
         'PASSWORD': 'pti.2025',
-        'HOST': 'localhost',  # Cambia esto si tu servidor SQL está en otra ubicación
+        'HOST': 'localhost',  # Cambiar esto si el servidor SQL está en otra ubicación
         'PORT': '1433',       # Puerto por defecto para SQL Server
         'OPTIONS': {
-            'driver': 'ODBC Driver 17 for SQL Server',  # Asegúrate de que este driver esté instalado
+            'driver': 'ODBC Driver 17 for SQL Server',  # Asegurar de que este driver esté instalado
         },
     }
 }
@@ -132,7 +132,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
 
-#vincular emplados con AbstractUser de django
+#vincular emplados con AbstractUser de django 
 #UTH_USER_MODEL = 'app.Empleados'
 
 
