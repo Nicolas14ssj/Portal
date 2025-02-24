@@ -1,45 +1,63 @@
 import requests
 import urllib3
+import os
 
-# Desactivar advertencias de certificados
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-# Credenciales y URL
-url = 'https://192.9.200.112:50000/b1s/v1/Login'
-headers = {
-    'Content-Type': 'application/json'
-}
-data = {
-    "CompanyDB": "Anwo_Produccion",  # Base de datos
-    "UserName": "manager2",
-    "Password": "m2025"
-}
+BASE_URL = "https://192.9.200.112:50000/b1s/v1"
 
-# Realiza la solicitud de autenticación
-response = requests.post(url, json=data, headers=headers, verify=False)
+def login():
+    #Autentica en SAP B1 y obtiene el token de sesión.
+    url = f"{BASE_URL}/Login"
+    headers = {'Content-Type': 'application/json'}
+    data = {
+        "CompanyDB": "Anwo_Produccion",
+        "UserName": os.getenv("SAP_USER", "manager2"),
+        "Password": os.getenv("SAP_PASS", "m2025")
+    }
+    try:
+        response = requests.post(url, json=data, headers=headers, verify=False, timeout=10)
+        response.raise_for_status()
+        session_id = response.json().get("SessionId")
+        if not session_id:
+            print("Error: No se recibió SessionId.")
+            return None
+        return session_id
+    except requests.exceptions.RequestException as e:
+        print("Error en la autenticación:", e)
+        return None
+#si inicia sesión 
 
-if response.status_code == 200:
-    print("Login exitoso")
-    token = response.json()['SessionId']
-    print("Token de sesión:", token)
+
+def obtener_datos_oitm(session_id):
+    #Obtiene los datos de OITM desde SAP B1.
+    url = f"{BASE_URL}/Items?$select=ItemCode, ItemName, ItemsGroupCode"
+
+    headers = {
+        'Content-Type': 'application/json',
+        'Cookie': f'B1SESSION={session_id}'
+    }
+    try:
+        response = requests.get(url, headers=headers, verify=False, timeout=10)
+        response.raise_for_status()
+        return response.json().get("value", [])
+    except requests.exceptions.HTTPError as e:
+        print(f"Error HTTP: {e}")
+        print("Código de estado:", response.status_code)
+        print("Respuesta completa:", response.text)
+        return None
+    except requests.exceptions.RequestException as e:
+        print("Error en la solicitud:", e)
+        return None
+
+# Ejecutar las funciones
+session_token = login()
+if session_token:
+    items = obtener_datos_oitm(session_token)
+    if items:
+        for item in items:
+            print(item)
+    else:
+        print("No se encontraron datos en OITM.")
 else:
-    print("Error en la autenticación:", response.status_code, response.text)
-    exit()  # Salir si la autenticación falla
-
-# Usar el token de sesión para realizar otras solicitudes
-# En este caso, el encabezado de autorización debe incluir el token como Bearer
-headers = {
-    'Content-Type': 'application/json',
-    'Authorization': f'Bearer {token}'  # Usando Bearer
-}
-
-# Obtener datos de OITM
-oitm_url = 'https://192.9.200.112:50000/b1s/v1/OITM'
-response = requests.get(oitm_url, headers=headers, verify=False)
-
-if response.status_code == 200:
-    data = response.json()
-    for item in data['value']:
-        print(item)  
-else:
-    print("Error al obtener datos de OITM:", response.status_code, response.text)
+    print("No se pudo iniciar sesión en SAP B1.")
