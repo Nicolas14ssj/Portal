@@ -75,7 +75,7 @@ class Rel_Perfiles_Modulos (models.Model):
 #MER
 class OITM(models.Model):  # Maestro de Articulos
     Itemcode = models.CharField(primary_key=True, max_length=120)  # NUMERO DE ARTICULO
-    ItemName = models.CharField(max_length=120)  # NOMBRE DE ARTICULO 
+    ItemName = models.CharField(max_length=120, null=True, blank=True)  # NOMBRE DE ARTICULO 
     ItmsGrpCod = models.IntegerField() # Grupo de articulos
     
     def __str__(self):
@@ -107,8 +107,8 @@ class OITW(models.Model):  # STOCK x bodega
 
 class OWHS(models.Model):  # maestro de BODEGA
     WhsCode = models.CharField(max_length=120, primary_key=True)  # CODIGO DE ALMACEN 
-    Itemcode = models.ForeignKey(OITM, on_delete=models.PROTECT, related_name='warehouse_items')  # NUMERO DE ARTICULO
-    OnHand = models.IntegerField()  # EN STOCK 
+    Itemcode = models.ForeignKey(OITM, null=True, blank=True, on_delete=models.PROTECT, related_name='warehouse_items')  # NUMERO DE ARTICULO
+    OnHand = models.IntegerField(null=True, blank=True)  # EN STOCK 
     WhsName = models.CharField(max_length=120)
 
     def __str__(self):
