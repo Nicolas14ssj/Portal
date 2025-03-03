@@ -126,8 +126,8 @@ class OCRD(models.Model):  # maestro de socios de negocios
     CardCode = models.CharField(max_length=120, primary_key=True)  # CODIGO SN 
     CardName = models.CharField(max_length=120)  # NOMBRE SN  
     CardType = models.CharField(max_length=120, default='No especifico')  # Tipo de socio de necogio   
-    validFor = models.CharField(max_length=120)  # ACTIVO
-    GroupCode = models.IntegerField() # CODIGO DE GRUPO  
+    validFor = models.CharField(max_length=120, null=True, blank=True)  # ACTIVO
+    GroupCode = models.IntegerField(null=True, blank=True) # CODIGO DE GRUPO  
     
     def __str__(self):
         return self.CardCode 

@@ -62,9 +62,10 @@ def fetch_data(entity, fields, session_id):
         print(f"Error en la solicitud de {entity}:", e)
         return []
 
-def save_data(session_id):
-    #btiene y guarda datos en la base de datos Django.
 
+
+
+def save_data(session_id):
     # OITM (Items)
     items = fetch_data("Items", ["ItemCode", "ItemName", "ItemsGroupCode"], session_id)
     for item in items:
@@ -76,7 +77,7 @@ def save_data(session_id):
             }
         )
 
-    # ORTT (ExchangeRates)
+    # ORTT (Tipo de Cambio) - Corregido a `ExchangeRates`
     rates = fetch_data("ExchangeRates", ["RateDate", "Currency", "Rate"], session_id)
     for rate in rates:
         ORTT.objects.update_or_create(
@@ -85,8 +86,8 @@ def save_data(session_id):
             defaults={"Rate": rate["Rate"]}
         )
 
-    # OITW (ItemWarehouseInfo)
-    stocks = fetch_data("ItemWarehouseInfo", ["ItemCode", "WarehouseCode", "InStock", "AvgPrice"], session_id)
+    # OITW (Stock por Bodega) - Corregido a `ItemWarehouseInfoCollection`
+    stocks = fetch_data("ItemWarehouseInfoCollection", ["ItemCode", "WarehouseCode", "InStock", "AvgPrice"], session_id)
     for stock in stocks:
         OITW.objects.update_or_create(
             Itemcode_id=stock["ItemCode"],
@@ -94,7 +95,7 @@ def save_data(session_id):
             defaults={"OnHand": stock["InStock"], "AvgPrice": stock["AvgPrice"]}
         )
 
-    # OWHS (Warehouses)
+    # OWHS (Bodegas)
     warehouses = fetch_data("Warehouses", ["WarehouseCode", "WarehouseName"], session_id)
     for whs in warehouses:
         OWHS.objects.update_or_create(
@@ -102,35 +103,39 @@ def save_data(session_id):
             defaults={"WhsName": whs["WarehouseName"]}
         )
 
-    # OCRD (BusinessPartners)
-    partners = fetch_data("BusinessPartners", ["CardCode", "CardName", "CardType", "ValidFor", "GroupCode"], session_id)
+    # OCRD (Socios de Negocios)
+    partners = fetch_data("BusinessPartners", ["CardCode", "CardName", "CardType", "GroupCode"], session_id)
     for partner in partners:
         OCRD.objects.update_or_create(
             CardCode=partner["CardCode"],
             defaults={
                 "CardName": partner["CardName"],
                 "CardType": partner["CardType"],
-                "validFor": partner["ValidFor"],
                 "GroupCode": partner.get("GroupCode")
             }
         )
 
-    # OINV (Invoices)
-    invoices = fetch_data("Invoices", ["DocEntry", "DocTotal", "VatSum", "DocDate", "DiscPrcnt", "ObjType", "CardCode"], session_id)
+    # OINV (Facturas)
+    invoices = fetch_data("Invoices", ["DocEntry", "DocTotal", "VatSum", "DocDate", "DiscountPercent", "DocumentType", "CardCode"], session_id)
     for inv in invoices:
-        OINV.objects.update_or_create(
-            DocNum=inv["DocEntry"],
-            defaults={
-                "DocTotal": inv["DocTotal"],
-                "VatSum": inv["VatSum"],
-                "DocDate": inv["DocDate"],
-                "DiscPrcnt": inv.get("DiscPrcnt"),
-                "ObjType": inv["ObjType"],
-                "CardCode_id": inv["CardCode"]
-            }
-        )
+        if OCRD.objects.filter(CardCode=inv["CardCode"]).exists():  # Solo insertar si existe en OCRD
+            OINV.objects.update_or_create(
+                DocNum=inv["DocEntry"],
+                defaults={
+                    "DocTotal": inv["DocTotal"],
+                    "VatSum": inv["VatSum"],
+                    "DocDate": inv["DocDate"],
+                    "DiscPrcnt": inv.get("DiscountPercent"),
+                    "ObjType": inv["DocumentType"],
+                    "CardCode_id": inv["CardCode"]
+                }
+            )
+        else:
+            print(f" Advertencia: El CardCode {inv['CardCode']} no existe en OCRD. Omitiendo factura.")
+
 
     print("Datos de SAP sincronizados correctamente.")
+
 
 class Command(BaseCommand):
     """Comando Django para sincronizar datos de SAP B1."""
