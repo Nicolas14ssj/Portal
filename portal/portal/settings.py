@@ -77,7 +77,7 @@ WSGI_APPLICATION = 'portal.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'mssql',
-        'NAME': 'p_portal',
+        'NAME': 'DATANWO',
         'USER': 'practica_ti',
         'PASSWORD': 'pti.2025',
         'HOST': 'localhost',  # Cambiar esto si el servidor SQL está en otra ubicación
