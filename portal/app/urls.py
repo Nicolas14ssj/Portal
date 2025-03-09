@@ -2,8 +2,15 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from django.contrib import admin
-from .views import crear_empleado,  ModulosViewsets, DetalleModuloViewsets, PerfilesViewsets, EmpleadosViewsets, EstadoViewsets, RelPerfilesModulosViewsets, OITMViewsets, ORTTViewsets, OITWViewsets, OWHSViewsets, OCRDViewsets, OINVViewsets, INV1Viewsets, OQUTViewsets, QUT1Viewsets, ORDRViewsets, RDR1Viewsets, ORINViewsets, RIN1Viewsets
-#url serializers 
+from .views import (
+    crear_empleado, ModulosViewsets, DetalleModuloViewsets, PerfilesViewsets, EmpleadosViewsets,
+    EstadoViewsets, RelPerfilesModulosViewsets, OITMViewsets, ORTTViewsets,
+    OITWViewsets, OWHSViewsets, OCRDViewsets, OINVViewsets, INV1Viewsets,
+    OQUTViewsets, QUT1Viewsets, ORDRViewsets, RDR1Viewsets, ORINViewsets,
+    RIN1Viewsets, PresupuestoB1Viewsets
+)
+
+# Creación del router para los ViewSets
 router = DefaultRouter()
 router.register(r'modulos', ModulosViewsets)
 router.register(r'detalle-modulo', DetalleModuloViewsets)
@@ -24,7 +31,7 @@ router.register(r'ordr', ORDRViewsets)
 router.register(r'rdr1', RDR1Viewsets)
 router.register(r'orin', ORINViewsets)
 router.register(r'rin1', RIN1Viewsets)
-
+router.register(r'presupuesto-b1', PresupuestoB1Viewsets)
 
 urlpatterns = [
     path('', include(router.urls)),

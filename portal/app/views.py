@@ -1,11 +1,18 @@
 from django.shortcuts import render, redirect
 from .forms import EmpleadoForm
-from rest_framework import viewsets
-from .models import Perfiles
 from django.contrib import messages
-from .models import OITM, ORTT, OITW, OWHS, OCRD, INV1, OINV, OQUT, ORDR, RIN1, QUT1, ORIN, RDR1, Modulos, DetalleModulo, Perfiles, Empleados, Estado, Rel_Perfiles_Modulos
-from .serializers import  OITMSerializer, ORTTSerializer, OITWSerializer, OWHSSerializer, OCRDSerializer, INV1Serializer, OINVSerializer, OQUTSerializer, ORDRSerializer, RIN1Serializer, QUT1Serializer, ORINSerializer, RDR1Serializer, ModulosSerializer, DetalleModuloSerializer, PerfilesSerializer, EmpleadosSerializer, EstadoSerializer, RelPerfilesModulosSerializer
-
+from rest_framework import viewsets
+from .models import (
+    OITM, ORTT, OITW, OWHS, OCRD, INV1, OINV, OQUT, ORDR, RIN1, QUT1, ORIN, RDR1, 
+    Modulos, DetalleModulo, Perfiles, Empleados, Estado, Rel_Perfiles_Modulos, Presupuesto_B1
+)
+from .serializers import (
+    OITMSerializer, ORTTSerializer, OITWSerializer, OWHSSerializer, OCRDSerializer, 
+    INV1Serializer, OINVSerializer, OQUTSerializer, ORDRSerializer, RIN1Serializer, 
+    QUT1Serializer, ORINSerializer, RDR1Serializer, ModulosSerializer, DetalleModuloSerializer, 
+    PerfilesSerializer, EmpleadosSerializer, EstadoSerializer, RelPerfilesModulosSerializer, 
+    PresupuestoB1Serializer
+)
 
 def crear_empleado(request):
     if request.method == 'POST':
@@ -17,8 +24,6 @@ def crear_empleado(request):
     else:
         form = EmpleadoForm()
     return render(request, 'crear_empleado.html', {'form': form})
-
-
 
 # ViewSet para Modulos
 class ModulosViewsets(viewsets.ModelViewSet):
@@ -52,7 +57,7 @@ class RelPerfilesModulosViewsets(viewsets.ModelViewSet):
 
 # ViewSet para OITM
 class OITMViewsets(viewsets.ModelViewSet):
-    queryset = OITM.objects.all().order_by('Itemcode')
+    queryset = OITM.objects.all().order_by('ItemCode')
     serializer_class = OITMSerializer
 
 # ViewSet para ORTT
@@ -115,3 +120,7 @@ class RIN1Viewsets(viewsets.ModelViewSet):
     queryset = RIN1.objects.all().order_by('DocEntry')
     serializer_class = RIN1Serializer
 
+# ViewSet para Presupuesto_B1
+class PresupuestoB1Viewsets(viewsets.ModelViewSet):
+    queryset = Presupuesto_B1.objects.all().order_by('anio')
+    serializer_class = PresupuestoB1Serializer

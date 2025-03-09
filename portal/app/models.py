@@ -128,7 +128,7 @@ class OITM(models.Model):  # Maestro de Artículos
     
     # Query Groups (QryGroup1 - QryGroup64)
     for i in range(1, 65):  
-        locals()[f'QryGroup{i}'] = models.BooleanField(default=False, db_column=f'QryGroup{i}')  
+        locals()[f'QryGroup{i}'] = models.BooleanField(null=True, default=False, db_column=f'QryGroup{i}')  
 
     EnAstSeri = models.CharField(max_length=1, null=True, blank=True, db_column='EnAstSeri')
     U_Masivo = models.CharField(max_length=1, null=True, blank=True, db_column='U_Masivo')
@@ -175,7 +175,7 @@ class OITW(models.Model):  # STOCK x bodega
     Itemcode = models.ForeignKey(OITM, on_delete=models.PROTECT, related_name='n_items', db_column='Itemcode')  # NUMERO DE ARTICULO
     OnHand = models.IntegerField(db_column='OnHand')  # EN STOCK 
     WhsCode = models.CharField(max_length=120, db_column='WhsCode')
-    AvgPrice =  models.DecimalField(max_digits=10, decimal_places=4, db_column='AvgPrice') # precio promedio
+    AvgPrice =  models.DecimalField(max_digits=10, null=True, decimal_places=4, db_column='AvgPrice') # precio promedio
     
 
     def __str__(self):
@@ -220,12 +220,12 @@ class OINV(models.Model):
     DocDate = models.DateTimeField(db_column='DocDate')
     DocDueDate = models.DateTimeField(null=True, blank=True, db_column='DocDueDate')
     CardCode = models.CharField(max_length=15, db_column='CardCode')
-    CardName = models.CharField(max_length=100, db_column='CardName')
+    CardName = models.CharField(max_length=100, null=True, db_column='CardName')
     DiscPrcnt = models.DecimalField(max_digits=19, decimal_places=6, null=True, blank=True, db_column='DiscPrcnt')
     Series = models.IntegerField(null=True, blank=True, db_column='Series')
     Indicator = models.CharField(max_length=2, null=True, blank=True, db_column='Indicator')
     ObjType = models.CharField(max_length=20, db_column='ObjType')
-    OCRD_CardCode = models.ForeignKey("OCRD", on_delete=models.PROTECT, related_name='C', null=True, default=None, db_column='CardCode')
+    OCRD_CardCode = models.ForeignKey("OCRD", on_delete=models.PROTECT, related_name='C', null=True, default=None, db_column='OCRD_CardCode')
     
     def __str__(self):
         return str(self.DocEntry)
@@ -235,7 +235,7 @@ class OINV(models.Model):
     
 class INV1(models.Model):  # DETALLE del documento de venta
     DocEntry = models.IntegerField( primary_key=True, db_column='DocEntry')  # NUMERO INTERNO DE DOCUMENTO
-    LineNum = models.IntegerField(primary_key=True, db_column='LineNum')  # NÚMERO DE LÍNEA
+    LineNum = models.IntegerField( db_column='LineNum')  # NÚMERO DE LÍNEA
     TargetType = models.IntegerField(null=True, blank=True, db_column='TargetType')  # TIPO DE DOCUMENTO DE DESTINO
     TrgetEntry = models.IntegerField(null=True, blank=True, db_column='TrgetEntry')  # ID INTERNO DE DOCUMENTO DE DESTINO
     BaseRef = models.CharField(max_length=100, null=True, blank=True, db_column='BaseRef')  # REFERENCIA BASE
@@ -282,10 +282,10 @@ class INV1(models.Model):  # DETALLE del documento de venta
     VatGroup = models.CharField(max_length=8, null=True, blank=True, db_column='VatGroup')  # GRUPO DE IVA
     
     # Relación con OINV (Documento de Venta)
-    DoCnum = models.ForeignKey(OINV, on_delete=models.PROTECT, related_name='inv1_lines', null=True, default=None, db_column='DocEntry')
+    DoCnum = models.ForeignKey(OINV, on_delete=models.PROTECT, related_name='inv1_lines', null=True, default=None, db_column='OINV_DocEntry')
     
     # Relación con OITM (Artículos)
-    OITM_ItemCode = models.ForeignKey(OITM, on_delete=models.PROTECT, related_name='oitm_inv1', null=True, default=None, db_column='ItemCode')
+    OITM_ItemCode = models.ForeignKey(OITM, on_delete=models.PROTECT, related_name='oitm_inv1', null=True, default=None, db_column='OITM_ItemCode')
     
     def __str__(self):
         return f"DocEntry: {self.DocEntry}, ItemCode: {self.ItemCode}, LineNum: {self.LineNum}"
@@ -383,7 +383,7 @@ class ORIN(models.Model):  # NOTA DE CREDITO (RIN1)
 
 
 class RIN1(models.Model):  # DETALLE de la Nota de Crédito
-    DocEntry = models.IntegerField(db_column='DocEntry')  # NUMERO INTERNO DE DOCUMENTO
+    DocEntry = models.IntegerField(primary_key=True, db_column='DocEntry')  # NUMERO INTERNO DE DOCUMENTO
     LineNum = models.IntegerField(db_column='LineNum')  # NÚMERO DE LÍNEA
     TargetType = models.IntegerField(null=True, blank=True, db_column='TargetType')  # TIPO DE DOCUMENTO DE DESTINO
     TrgetEntry = models.IntegerField(null=True, blank=True, db_column='TrgetEntry')  # ID INTERNO DE DOCUMENTO DE DESTINO
@@ -431,13 +431,38 @@ class RIN1(models.Model):  # DETALLE de la Nota de Crédito
     VatGroup = models.CharField(max_length=8, null=True, blank=True, db_column='VatGroup')  # GRUPO DE IVA
     
     # Relación con ORIN (Cabecera de la Nota de Crédito)
-    ORIN_DocEntry = models.ForeignKey(ORIN, on_delete=models.PROTECT, related_name='rin1_lines', null=True, default=None, db_column='DocEntry')
+    ORIN_DocEntry = models.ForeignKey(ORIN, on_delete=models.PROTECT, related_name='rin1_lines', null=True, default=None, db_column='ORIN_DocEntry')
     
     # Relación con OITM (Artículos)
-    OITM_ItemCode = models.ForeignKey(OITM, on_delete=models.PROTECT, related_name='oitm_rin1', null=True, default=None, db_column='ItemCode')
+    OITM_ItemCode = models.ForeignKey(OITM, on_delete=models.PROTECT, related_name='oitm_rin1', null=True, default=None, db_column='OITM_temCode')
     
     def __str__(self):
         return f"DocEntry: {self.DocEntry}, ItemCode: {self.ItemCode}, LineNum: {self.LineNum}"
+    
+
+class Presupuesto_B1(models.Model):
+    sucursal = models.CharField(max_length=50, db_column='U_Sucursal')  # SUCURSAL
+    linea = models.CharField(max_length=50, db_column='U_Linea')  # LÍNEA
+    anio = models.IntegerField(db_column='U_Periodo')  
+    enero = models.DecimalField(max_digits=19, decimal_places=6, null=True, db_column='U_Enero')  
+    febrero = models.DecimalField(max_digits=19, decimal_places=6, null=True, db_column='U_Febrero')  
+    marzo = models.DecimalField(max_digits=19, decimal_places=6, null=True, db_column='U_Marzo')  
+    abril = models.DecimalField(max_digits=19, decimal_places=6, null=True, db_column='U_Abril')  
+    mayo = models.DecimalField(max_digits=19, decimal_places=6, null=True, db_column='U_Mayo')  
+    junio = models.DecimalField(max_digits=19, decimal_places=6, null=True, db_column='U_Junio')  
+    julio = models.DecimalField(max_digits=19, decimal_places=6, null=True, db_column='U_Julio')  
+    agosto = models.DecimalField(max_digits=19, decimal_places=6, null=True, db_column='U_Agosto') 
+    septiembre = models.DecimalField(max_digits=19, decimal_places=6, null=True, db_column='U_Septiembre')  
+    octubre = models.DecimalField(max_digits=19, decimal_places=6, null=True, db_column='U_Octubre')  
+    noviembre = models.DecimalField(max_digits=19, decimal_places=6, null=True, db_column='U_Noviembre')  
+    diciembre = models.DecimalField(max_digits=19, decimal_places=6, null=True, db_column='U_Diciembre')  
+    
+    class Meta:
+        db_table = 'PRESUPUESTO_B1'  # Nombre de la tabla en la base de datos
+    
+    def __str__(self):
+        return f"{self.sucursal} - {self.linea} - {self.año}"
+
 
     
 
