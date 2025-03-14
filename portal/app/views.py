@@ -4,14 +4,14 @@ from django.contrib import messages
 from rest_framework import viewsets
 from .models import (
     OITM, ORTT, OITW, OWHS, OCRD, INV1, OINV, OQUT, ORDR, RIN1, QUT1, ORIN, RDR1, 
-    Modulos, DetalleModulo, Perfiles, Empleados, Estado, Rel_Perfiles_Modulos, Presupuesto_B1
+    Modulos, DetalleModulo, Perfiles, Empleados, Estado, Rel_Perfiles_Modulos, Presupuesto_B1, HLD1
 )
 from .serializers import (
     OITMSerializer, ORTTSerializer, OITWSerializer, OWHSSerializer, OCRDSerializer, 
     INV1Serializer, OINVSerializer, OQUTSerializer, ORDRSerializer, RIN1Serializer, 
     QUT1Serializer, ORINSerializer, RDR1Serializer, ModulosSerializer, DetalleModuloSerializer, 
     PerfilesSerializer, EmpleadosSerializer, EstadoSerializer, RelPerfilesModulosSerializer, 
-    PresupuestoB1Serializer
+    PresupuestoB1Serializer, HLD1Serializer
 )
 
 def crear_empleado(request):
@@ -25,6 +25,7 @@ def crear_empleado(request):
         form = EmpleadoForm()
     return render(request, 'crear_empleado.html', {'form': form})
 
+# --- VIEWSETS ---
 # ViewSet para Modulos
 class ModulosViewsets(viewsets.ModelViewSet):
     queryset = Modulos.objects.all().order_by('id_modulo')
@@ -57,7 +58,7 @@ class RelPerfilesModulosViewsets(viewsets.ModelViewSet):
 
 # ViewSet para OITM
 class OITMViewsets(viewsets.ModelViewSet):
-    queryset = OITM.objects.all().order_by('ItemCode')
+    queryset = OITM.objects.all().order_by('ItemCode')  # Asegurar que coincide con models.py
     serializer_class = OITMSerializer
 
 # ViewSet para ORTT
@@ -67,7 +68,7 @@ class ORTTViewsets(viewsets.ModelViewSet):
 
 # ViewSet para OITW
 class OITWViewsets(viewsets.ModelViewSet):
-    queryset = OITW.objects.all().order_by('Itemcode')
+    queryset = OITW.objects.all().order_by('OITM_Itemcode')  # Asegurar compatibilidad con models.py
     serializer_class = OITWSerializer
 
 # ViewSet para OWHS
@@ -87,7 +88,7 @@ class OINVViewsets(viewsets.ModelViewSet):
 
 # ViewSet para INV1
 class INV1Viewsets(viewsets.ModelViewSet):
-    queryset = INV1.objects.all().order_by('DocEntry')
+    queryset = INV1.objects.all().order_by('OINV_DocEntry')
     serializer_class = INV1Serializer
 
 # ViewSet para OQUT
@@ -97,7 +98,7 @@ class OQUTViewsets(viewsets.ModelViewSet):
 
 # ViewSet para QUT1
 class QUT1Viewsets(viewsets.ModelViewSet):
-    queryset = QUT1.objects.all().order_by('DocEntry')
+    queryset = QUT1.objects.all().order_by('OQUT_DocEntry')
     serializer_class = QUT1Serializer
 
 # ViewSet para ORDR
@@ -107,7 +108,7 @@ class ORDRViewsets(viewsets.ModelViewSet):
 
 # ViewSet para RDR1
 class RDR1Viewsets(viewsets.ModelViewSet):
-    queryset = RDR1.objects.all().order_by('DocEntry')
+    queryset = RDR1.objects.all().order_by('ORDR_DocEntry')
     serializer_class = RDR1Serializer
 
 # ViewSet para ORIN
@@ -117,10 +118,15 @@ class ORINViewsets(viewsets.ModelViewSet):
 
 # ViewSet para RIN1
 class RIN1Viewsets(viewsets.ModelViewSet):
-    queryset = RIN1.objects.all().order_by('DocEntry')
+    queryset = RIN1.objects.all().order_by('ORIN_DocEntry')
     serializer_class = RIN1Serializer
 
 # ViewSet para Presupuesto_B1
 class PresupuestoB1Viewsets(viewsets.ModelViewSet):
     queryset = Presupuesto_B1.objects.all().order_by('anio')
     serializer_class = PresupuestoB1Serializer
+
+# ViewSet para HLD1
+class HLD1Viewsets(viewsets.ModelViewSet):
+    queryset = HLD1.objects.all().order_by('StrDate')
+    serializer_class  = HLD1Serializer

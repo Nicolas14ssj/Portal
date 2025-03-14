@@ -7,7 +7,7 @@ from .views import (
     EstadoViewsets, RelPerfilesModulosViewsets, OITMViewsets, ORTTViewsets,
     OITWViewsets, OWHSViewsets, OCRDViewsets, OINVViewsets, INV1Viewsets,
     OQUTViewsets, QUT1Viewsets, ORDRViewsets, RDR1Viewsets, ORINViewsets,
-    RIN1Viewsets, PresupuestoB1Viewsets
+    RIN1Viewsets, PresupuestoB1Viewsets, HLD1Viewsets
 )
 
 # Creación del router para los ViewSets
@@ -32,6 +32,7 @@ router.register(r'rdr1', RDR1Viewsets)
 router.register(r'orin', ORINViewsets)
 router.register(r'rin1', RIN1Viewsets)
 router.register(r'presupuesto-b1', PresupuestoB1Viewsets)
+router.register(r'hld1', HLD1Viewsets)
 
 urlpatterns = [
     path('', include(router.urls)),

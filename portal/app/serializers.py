@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from .models import (
     OITM, ORTT, OITW, OWHS, OCRD, INV1, OINV, OQUT, ORDR, RIN1, QUT1, ORIN, RDR1, 
-    Presupuesto_B1, Modulos, DetalleModulo, Perfiles, Empleados, Estado, Rel_Perfiles_Modulos
+    Presupuesto_B1, HLD1, Modulos, DetalleModulo, Perfiles, Empleados, Estado, Rel_Perfiles_Modulos
 )
 
 class ModulosSerializer(serializers.HyperlinkedModelSerializer): 
@@ -47,12 +47,12 @@ class ORTTSerializer(serializers.HyperlinkedModelSerializer):
 class OITWSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = OITW
-        fields = ('Itemcode', 'OnHand')
+        fields = ('OITM_Itemcode', 'Itemcode', 'OnHand')
 
 class OWHSSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = OWHS
-        fields = ('WhsCode', 'Itemcode', 'OnHand')
+        fields = ('WhsCode', 'OITM_Itemcode', 'OnHand')
 
 class OCRDSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
@@ -62,12 +62,12 @@ class OCRDSerializer(serializers.HyperlinkedModelSerializer):
 class OINVSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = OINV
-        fields = ('DocNum', 'DocTotal', 'VatSum', 'CardCode', 'DocDate', 'DiscPrcnt', 'ObjType', 'OCRD_CardCode')
+        fields = ('DocNum', 'DocTotal', 'VatSum', 'CaOCRD_CardCode', 'DocDate', 'DiscPrcnt', 'ObjType', )
 
 class INV1Serializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = INV1
-        fields = ('DocEntry', 'Itemcode', 'Quantity', 'LineTotal', 'GrossBuyPr', 'BaseEntry', 'BaseType', 'TrgetEntry', 'DoCnum', 'OITM_ItemCode')
+        fields = ('DocEntry', 'OITM_ItemCode', 'Quantity', 'LineTotal', 'GrossBuyPr', 'BaseEntry', 'BaseType', 'TrgetEntry', 'DoCnum', )
 
 class OQUTSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
@@ -97,9 +97,14 @@ class ORINSerializer(serializers.HyperlinkedModelSerializer):
 class RIN1Serializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = RIN1
-        fields = ('DocEntry', 'Itemcode', 'Quantity', 'LineTotal', 'GrossBuyPr', 'BaseEntry', 'BaseType', 'TrgetEntry', 'ORIN_DocEntry', 'OITM_ItemCode')
+        fields = ('ORIN_DocEntry', 'OITM_ItemCode', 'Quantity', 'LineTotal', 'GrossBuyPr', 'BaseEntry', 'BaseType', 'TrgetEntry',)
 
 class PresupuestoB1Serializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Presupuesto_B1
         fields = ('SUCURSAL', 'LINEA', 'anio', 'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre')
+
+class HLD1Serializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = HLD1
+        fields = ('StrDate', 'Rmrks')
