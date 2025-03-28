@@ -5,7 +5,7 @@ from django.contrib import admin
 from .views import (
     crear_empleado, ModulosViewsets, DetalleModuloViewsets, PerfilesViewsets, EmpleadosViewsets,
     EstadoViewsets, RelPerfilesModulosViewsets, OITMViewsets, ORTTViewsets,
-    OITWViewsets, OWHSViewsets, OCRDViewsets, OINVViewsets, INV1Viewsets,
+    OITWViewsets, OWHSViewsets, SeriesViewset,OCRDViewsets, OINVViewsets, INV1Viewsets,
     OQUTViewsets, QUT1Viewsets, ORDRViewsets, RDR1Viewsets, ORINViewsets,
     RIN1Viewsets, PresupuestoB1Viewsets, HLD1Viewsets
 )
@@ -22,6 +22,7 @@ router.register(r'oitm', OITMViewsets)
 router.register(r'ortt', ORTTViewsets)
 router.register(r'oitw', OITWViewsets)
 router.register(r'owhs', OWHSViewsets)
+router.register(r'series', SeriesViewset)
 router.register(r'ocrd', OCRDViewsets)
 router.register(r'oinv', OINVViewsets)
 router.register(r'inv1', INV1Viewsets)

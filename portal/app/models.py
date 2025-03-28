@@ -86,7 +86,8 @@ class OITM(models.Model):  # Maestro de Artículos
     VATLiable = models.CharField(max_length=1, null=True, blank=True, db_column='VATLiable')  
     PrchseItem = models.CharField(max_length=1, null=True, blank=True, db_column='PrchseItem')  
     SellItem = models.CharField(max_length=1, null=True, blank=True, db_column='SellItem')  
-    InvntItem = models.CharField(max_length=1, null=True, blank=True, db_column='InvntItem')  
+    InvntItem = models.CharField(max_length=1, null=True, blank=True, db_column='InvntItem')
+    OnHand = models.DecimalField(max_digits=19, decimal_places=6, null=True, blank=True, db_column='OnHand')  # EN STOCK   
     CardCode = models.CharField(max_length=15, null=True, blank=True, db_column='CardCode')  
     DscountCod = models.SmallIntegerField(null=True, blank=True, db_column='DscountCod')  
     
@@ -128,7 +129,7 @@ class OITM(models.Model):  # Maestro de Artículos
     
     # Query Groups (QryGroup1 - QryGroup64)
     for i in range(1, 65):  
-        locals()[f'QryGroup{i}'] = models.BooleanField(null=True, default=False, db_column=f'QryGroup{i}')  
+        locals()[f'QryGroup{i}'] = models.CharField( max_length=1, null=True, default=False, db_column=f'QryGroup{i}')  
 
     EnAstSeri = models.CharField(max_length=1, null=True, blank=True, db_column='EnAstSeri')
     U_Masivo = models.CharField(max_length=1, null=True, blank=True, db_column='U_Masivo')
@@ -172,7 +173,7 @@ class ORTT(models.Model):  # maestro de tipo de cambio
     
 
 class OITW(models.Model):  # STOCK x bodega
-    OITM_Itemcode = models.ForeignKey(OITM, on_delete=models.PROTECT, related_name='n_items', db_column='Itemcode')  # NUMERO DE ARTICULO
+    Itemcode = models.ForeignKey(OITM, on_delete=models.PROTECT, related_name='n_items', db_column='Itemcode')  # NUMERO DE ARTICULO
     OnHand = models.IntegerField(db_column='OnHand')  # EN STOCK 
     WhsCode = models.CharField(max_length=120, db_column='WhsCode')
     AvgPrice =  models.DecimalField(max_digits=19, null=True, decimal_places=6, db_column='AvgPrice') # precio promedio
@@ -185,9 +186,9 @@ class OITW(models.Model):  # STOCK x bodega
 
 class OWHS(models.Model):  # maestro de BODEGA
     WhsCode = models.CharField(max_length=120, primary_key=True, db_column='WhsCode')  # CODIGO DE ALMACEN 
-    OITM_Itemcode = models.ForeignKey(OITM, null=True, blank=True, on_delete=models.PROTECT, related_name='warehouse_items', db_column='Itemcode')  # NUMERO DE ARTICULO
-    OnHand = models.IntegerField(null=True, blank=True, db_column='OnHand')  # EN STOCK 
-    WhsName = models.CharField(max_length=120, db_column='WhsName')
+    Itemcode = models.ForeignKey(OITM, null=True, blank=True, on_delete=models.PROTECT, related_name='warehouse_items', db_column='Itemcode')  # NUMERO DE ARTICULO
+    OnHand = models.DecimalField(max_digits=19, decimal_places=6, null=True, blank=True, db_column='OnHand')  # EN STOCK 
+    WhsName = models.CharField(max_length=120, null=True, db_column='WhsName')
 
     def __str__(self):
         return self.WhsCode
@@ -200,248 +201,334 @@ class OWHS(models.Model):  # maestro de BODEGA
     # en sap existen 3 tipos de negocios los leed que corresponden a algo no especifico, pueden ser clientes o proveedores y los ya mencionados
 
 
+class Series (models.Model): #NNM1 
+    ObjectCode = models.CharField(max_length=20, db_column='ObjectCode')
+    Series = models.IntegerField(primary_key=True,db_column='Series')
+    SeriesName = models.CharField(max_length=8, db_column='SeriesName')
+
+    class Meta:
+        unique_together = ('ObjectCode', 'Series')  # Clave primaria compuesta
+
+    def __str__(self):
+        return f"{self.ObjectCode} - {self.Series}"
+
+
+
+
 class OCRD(models.Model):  # maestro de socios de negocios  
     CardCode = models.CharField(max_length=120, primary_key=True, db_column='CardCode')  # CODIGO SN 
     CardName = models.CharField(max_length=120,  null=True, db_column='CardName')  # NOMBRE SN  
     CardType = models.CharField(max_length=120, null=True, default='No especifico', db_column='CardType')  # Tipo de socio de necogio   
     validFor = models.CharField(max_length=120, null=True, blank=True, db_column='validFor')  # ACTIVO
-    GroupCode = models.SmallIntegerField(null=True, blank=True, db_column='GroupCode')  # # CODIGO DE GRUPO  
+    GroupCode = models.SmallIntegerField(null=True, blank=True, db_column='GroupCode')  # # CODIGO DE GRUPO 
+    LicTradNum =  models.CharField(max_length=120,  null=True, blank=True, db_column='LicTradNum') 
+    E_Mail = models.CharField(max_length=120,  null=True, blank=True, db_column='E_Mail') 
     
     def __str__(self):
         return self.CardCode 
     
     
-     
 class OINV(models.Model):
-    DocEntry = models.IntegerField(primary_key=True, db_column='DocEntry')
-    DocNum = models.IntegerField(db_column='DocNum')
-    DocTotal = models.DecimalField(max_digits=19, decimal_places=6, db_column='DocTotal')
-    VatSum = models.DecimalField(max_digits=19, decimal_places=6, null=True, blank=True, db_column='VatSum')
-    DocDate = models.DateTimeField(db_column='DocDate')
-    DocDueDate = models.DateTimeField(null=True, blank=True, db_column='DocDueDate')
-    OCRD_CardCode = models.ForeignKey("OCRD", on_delete=models.PROTECT, related_name='C', null=True, default=None, db_column='CardCode')
-    CardName = models.CharField(max_length=100, null=True, db_column='CardName')
-    DiscPrcnt = models.DecimalField(max_digits=19, decimal_places=6, null=True, blank=True, db_column='DiscPrcnt')
-    Series = models.IntegerField(null=True, blank=True, db_column='Series')
-    Indicator = models.CharField(max_length=2, null=True, blank=True, db_column='Indicator')
-    ObjType = models.CharField(max_length=20, db_column='ObjType')
-    
-    
-    def __str__(self):
-        return str(self.DocEntry)
-
-    
-    
-    
-class INV1(models.Model):  # DETALLE del documento de venta 
-    id = models.AutoField(primary_key=True, default=1)
-    # Relación con OINV (Documento de Venta)
-    OINV_DocEntry = models.ForeignKey(OINV, on_delete=models.PROTECT, related_name='inv1_lines', null=True, default=None, db_column='DocEntry')
-    LineNum = models.IntegerField( db_column='LineNum')  # NÚMERO DE LÍNEA
-    TargetType = models.IntegerField(null=True, blank=True, db_column='TargetType')  # TIPO DE DOCUMENTO DE DESTINO
-    TrgetEntry = models.IntegerField(null=True, blank=True, db_column='TrgetEntry')  # ID INTERNO DE DOCUMENTO DE DESTINO
-    BaseRef = models.CharField(max_length=100, null=True, blank=True, db_column='BaseRef')  # REFERENCIA BASE
-    BaseType = models.IntegerField(null=True, blank=True, db_column='BaseType')  # CLASE DE DOCUMENTO BASE
-    BaseEntry = models.IntegerField(null=True, blank=True, db_column='BaseEntry')  # ID INTERNO DE DOCUMENTO BASE
-    BaseLine = models.IntegerField(null=True, blank=True, db_column='BaseLine')  # NÚMERO DE LÍNEA DEL DOCUMENTO BASE
-    LineStatus = models.CharField(max_length=1, null=True, blank=True, db_column='LineStatus')  # ESTADO DE LÍNEA
-    # Relación con OITM (Artículos)
-    OITM_ItemCode = models.ForeignKey(OITM, on_delete=models.PROTECT, related_name='oitm_inv1', null=True, default=None, db_column='ItemCode')
-    Dscription = models.CharField(max_length=254, null=True, blank=True, db_column='Dscription')  # DESCRIPCIÓN DEL ARTÍCULO
-    Quantity = models.DecimalField(max_digits=19, decimal_places=6, db_column='Quantity')  # CANTIDAD
-    ShipDate = models.DateTimeField(null=True, blank=True, db_column='ShipDate')  # FECHA DE ENTREGA
-    OpenQty = models.DecimalField(max_digits=19, decimal_places=6, null=True, db_column='OpenQty')  # CANTIDAD ABIERTA
-    Price = models.DecimalField(max_digits=19, decimal_places=6, null=True, db_column='Price')  # PRECIO UNITARIO
-    Currency = models.CharField(max_length=3, null=True, blank=True, db_column='Currency')  # MONEDA
-    Rate = models.DecimalField(max_digits=19, decimal_places=6, null=True, blank=True, db_column='Rate')  # TIPO DE CAMBIO
-    DiscPrcnt = models.DecimalField(max_digits=19, decimal_places=6, null=True, blank=True, db_column='DiscPrcnt')  # % DE DESCUENTO PARA LA LÍNEA
-    LineTotal = models.DecimalField(max_digits=19, decimal_places=6, db_column='LineTotal')  # TOTAL DE LÍNEA
-    TotalFrgn = models.DecimalField(max_digits=19, decimal_places=6, null=True, blank=True, db_column='TotalFrgn')  # TOTAL EN MONEDA EXTRANJERA
-    OpenSum = models.DecimalField(max_digits=19, decimal_places=6, null=True, blank=True, db_column='OpenSum')  # SALDO ABIERTO
-    OpenSumFC = models.DecimalField(max_digits=19, decimal_places=6, null=True, blank=True, db_column='OpenSumFC')  # SALDO ABIERTO EN MONEDA EXTRANJERA
-    VendorNum = models.CharField(max_length=50, null=True, blank=True, db_column='VendorNum')  # CÓDIGO DE PROVEEDOR
-    SerialNum = models.CharField(max_length=50, null=True, blank=True, db_column='SerialNum')  # NÚMERO DE SERIE
-    WhsCode = models.CharField(max_length=8, null=True, blank=True, db_column='WhsCode')  # CÓDIGO DE ALMACÉN
-    SlpCode = models.IntegerField(null=True, blank=True, db_column='SlpCode')  # CÓDIGO DEL VENDEDOR
-    Commission = models.DecimalField(max_digits=19, decimal_places=6, null=True, blank=True, db_column='Commission')  # COMISIÓN
-    TreeType = models.CharField(max_length=1, null=True, blank=True, db_column='TreeType')  # TIPO DE ÁRBOL
-    AcctCode = models.CharField(max_length=15, null=True, blank=True, db_column='AcctCode')  # CÓDIGO DE CUENTA
-    TaxStatus = models.CharField(max_length=1, null=True, blank=True, db_column='TaxStatus')  # ESTADO DEL IMPUESTO
-    GrossBuyPr = models.DecimalField(max_digits=19, decimal_places=6, null=True, blank=True, db_column='GrossBuyPr')  # PRECIO BRUTO DE COMPRA
-    PriceBefDi = models.DecimalField(max_digits=19, decimal_places=6, null=True, blank=True, db_column='PriceBefDi')  # PRECIO ANTES DE DESCUENTO
-    DocDate = models.DateTimeField(null=True, blank=True, db_column='DocDate')  # FECHA DEL DOCUMENTO
-    Flags = models.IntegerField(null=True, blank=True, db_column='Flags')  # BANDERAS
-    OpenCreQty = models.DecimalField(max_digits=19, decimal_places=6, null=True, blank=True, db_column='OpenCreQty')  # CANTIDAD ABIERTA PARA CRÉDITO
-    UseBaseUn = models.CharField(max_length=1, null=True, blank=True, db_column='UseBaseUn')  # USO DE UNIDAD BASE
-    SubCatNum = models.IntegerField(null=True, blank=True, db_column='SubCatNum')  # SUBCATEGORÍA
-    BaseCard = models.CharField(max_length=15, null=True, blank=True, db_column='BaseCard')  # CÓDIGO BASE
-    TotalSumSy = models.DecimalField(max_digits=19, decimal_places=6, null=True, blank=True, db_column='TotalSumSy')  # TOTAL EN SISTEMA
-    OpenSumSys = models.DecimalField(max_digits=19, decimal_places=6, null=True, blank=True, db_column='OpenSumSys')  # SALDO ABIERTO EN SISTEMA
-    InvntSttus = models.CharField(max_length=1, null=True, blank=True, db_column='InvntSttus')  # ESTADO DEL INVENTARIO
-    OcrCode = models.CharField(max_length=8, null=True, blank=True, db_column='OcrCode')  # CÓDIGO DE CENTRO DE COSTO
-    Project = models.CharField(max_length=20, null=True, blank=True, db_column='Project')  # PROYECTO ASOCIADO
-    CodeBars = models.CharField(max_length=254, null=True, blank=True, db_column='CodeBars')  # CÓDIGO DE BARRAS
-    VatPrcnt = models.DecimalField(max_digits=19, decimal_places=6, null=True, blank=True, db_column='VatPrcnt')  # PORCENTAJE DE IVA
-    VatGroup = models.CharField(max_length=8, null=True, blank=True, db_column='VatGroup')  # GRUPO DE IVA
-    
-    def __str__(self):
-        return f"DocEntry: {self.DocEntry}, ItemCode: {self.ItemCode}, LineNum: {self.LineNum}"
-
-    
-
-
-class OQUT(models.Model):  # COTIZACION (QUT1)
-    DocTotal = models.DecimalField(max_digits=19, decimal_places=6, db_column='DocTotal')  # total factura
-    VatSum = models.DecimalField(max_digits=19, decimal_places=6, db_column='VatSum')  # IMPUESTO TOTAL 
-    OCRD_CardCode = models.ForeignKey(OCRD,  on_delete=models.PROTECT, related_name='CI', null=True, default=None, db_column='CardCode') 
-    DocDate = models.DateTimeField(db_column='DocDate')  # fecha de contabilizacion 
-    DiscPrcnt = models.DecimalField(max_digits=19, decimal_places=6,  null=True, default=0, db_column='DiscPrcnt')  # % DE DESCUENTO PARA DOCUMENTO 
-    DocEntry = models.IntegerField(primary_key=True, db_column='DocEntry')  # NUMERO INTERNO DE DOCUMENTO 
-    ObjType = models.CharField(max_length=50, db_column='ObjType')  # TIPO DE OBJETO 
-                     
-    def __str__(self):
-        return self.DocEntry
-    
-    
-    
-    
-class QUT1(models.Model):  # DETALLE DE COTIZACIÓN
-    id = models.AutoField(primary_key=True)  # Autoincremental, evita problemas con claves duplicadas
-    OQUT_DocEntry = models.ForeignKey(OQUT, on_delete=models.PROTECT, related_name='qut1_entries', null=True, db_column='DocEntry')  # FK correcta
-    OITM_ItemCode = models.ForeignKey(OITM, on_delete=models.PROTECT, related_name='OE', null=True, db_column='ItemCode')  # FK correcta
-    LineNum = models.IntegerField( db_column='LineNum')  # NÚMERO DE LÍNEA
-    Quantity = models.DecimalField(max_digits=19, decimal_places=6, db_column='Quantity')  # Cantidad
-    LineTotal = models.DecimalField(max_digits=19, decimal_places=6, db_column='LineTotal')  # Total líneas
-    GrossBuyPr = models.DecimalField(max_digits=19, decimal_places=6, db_column='GrossBuyPr')  # Precio bruto
-    BaseEntry = models.IntegerField(null=True, blank=True, db_column='BaseEntry')  # ID de documento base
-    BaseType = models.IntegerField(null=True, blank=True, db_column='BaseType')  # Tipo de documento base
-    TrgetEntry = models.IntegerField(null=True, blank=True, db_column='TrgetEntry')  # Documento de destino
-
-    class Meta:
-        unique_together = (('OQUT_DocEntry', 'OITM_ItemCode'),)  # Define clave compuesta en Django
-
-    def __str__(self):
-        return f"{self.OQUT_DocEntry} - {self.OITM_ItemCode}"
-
-
-
-
-
-
-class ORDR(models.Model):  # PEDIDOS (RDR1)
-    DocTotal = models.DecimalField(max_digits=19, decimal_places=6, db_column='DocTotal')  # total factura
-    VatSum = models.DecimalField(max_digits=19, decimal_places=6,db_column='VatSum' )  # IMPUESTO TOTAL 
-    OCRD_CardCode = models.ForeignKey(OCRD,  on_delete=models.PROTECT, related_name='CO', null=True, default=None, db_column='CardCode') 
-    DocDate = models.DateTimeField(auto_now_add=False, db_column='DocDate')  # fecha de contabilizacion 
-    DiscPrcnt = models.DecimalField(max_digits=19, decimal_places=6,null=True, db_column='DiscPrcnt')  # % DE DESCUENTO PARA DOCUMENTO 
-    DocEntry = models.CharField(max_length=120, primary_key=True, db_column='DocEntry')  # NUMERO INTERNO DE DOCUMENTO 
-    ObjType = models.CharField(max_length=120, db_column='ObjType')  # TIPO DE OBJETO   
-             
-    def __str__(self):
-        return self.DocEntry
-    
-    
-
-class RDR1(models.Model):  # DETALLE 
-    id = models.AutoField(primary_key=True)
-    ORDR_DocEntry = models.ForeignKey(ORDR, on_delete=models.PROTECT, related_name='cno', null=True, default=None, db_column='DocEntry') 
-    OITM_ItemCode = models.ForeignKey(OITM, on_delete=models.PROTECT, related_name='OI', null=True, default=None,  db_column='ItemCode')  
-    Quantity = models.DecimalField(max_digits=19, decimal_places=6)  
-    LineNum = models.IntegerField( db_column='LineNum')  # NÚMERO DE LÍNEA
-    LineTotal = models.DecimalField(max_digits=19, decimal_places=6)  # Cambio a DecimalField
-    GrossBuyPr = models.DecimalField(max_digits=19, decimal_places=6)  # PRECIO DE COSTE INGRESO BRUTO
-    BaseEntry = models.CharField(max_length=120)  # ID INTERNO DE DOCUMENTO BASE
-    BaseType = models.CharField(max_length=120)  # CLASE DE DOCUMENTO BASE
-    TrgetEntry = models.CharField(max_length=120)  # ID INTERNO DE DOCUMENTO DE DESTINO
-   
-    def __str__(self):
-        return str(self.DocEntry)  # Convierte a string para evitar errores de retorno
-
-
-
-
-    
-class ORIN(models.Model):  # NOTA DE CREDITO (RIN1)
-    DocEntry = models.IntegerField(primary_key=True, default='None')
+    DocEntry = models.BigIntegerField(primary_key=True, default=0)
     DocNum = models.IntegerField(db_column='DocNum')
     DocType = models.CharField(max_length=120)
     DocDueDate = models.DateTimeField(null=True, blank=True, db_column='DocDueDate')
-    DocTotal = models.DecimalField(max_digits=19, decimal_places=6)  # total factura
-    VatSum = models.DecimalField(null=True, max_digits=19, decimal_places=6)  # IMPUESTO TOTAL 
-    OCRD_CardCode = models.ForeignKey(OCRD,  on_delete=models.PROTECT, related_name='CD', null=True, default=None, db_column='CardCode') 
-    DocDate = models.DateTimeField(null=True,auto_now_add=False)  # fecha de contabilizacion 
-    DiscPrcnt = models.DecimalField(null=True, max_digits=16, decimal_places=6)  # % DE DESCUENTO PARA DOCUMENTO  
-    ObjType = models.CharField(max_length=120)  # TIPO DE OBJETO 
+    DocTotal = models.DecimalField(max_digits=19, decimal_places=6)
+    VatSum = models.DecimalField(null=True, max_digits=19, decimal_places=6)
+    CardCode = models.ForeignKey(OCRD, on_delete=models.PROTECT, related_name='OINV_CD', null=True, default=None, db_column='CardCode')
+    DocDate = models.DateTimeField(null=True, auto_now_add=False)
+    DiscPrcnt = models.DecimalField(null=True, max_digits=16, decimal_places=6)
+    ObjType = models.CharField(max_length=120)
     Series = models.IntegerField(null=True, blank=True, db_column='Series')
-               
-         
+
     def __str__(self):
-        return self.DocEntry
+        return str(self.DocEntry)
 
 
-
-
-class RIN1(models.Model):  # DETALLE de la Nota de Crédito
+class INV1(models.Model):
     id = models.AutoField(primary_key=True, default=1)
-        # Relación con ORIN (Cabecera de la Nota de Crédito)
-    ORIN_DocEntry = models.ForeignKey(ORIN, on_delete=models.PROTECT, related_name='rin1_lines', null=True, default=None, db_column='DocEntry')    
-    LineNum = models.IntegerField(db_column='LineNum')  # NÚMERO DE LÍNEA
-    TargetType = models.IntegerField(null=True, blank=True, db_column='TargetType')  # TIPO DE DOCUMENTO DE DESTINO
-    TrgetEntry = models.IntegerField(null=True, blank=True, db_column='TrgetEntry')  # ID INTERNO DE DOCUMENTO DE DESTINO
-    BaseRef = models.CharField(max_length=100, null=True, blank=True, db_column='BaseRef')  # REFERENCIA BASE
-    BaseType = models.IntegerField(null=True, blank=True, db_column='BaseType')  # CLASE DE DOCUMENTO BASE
-    BaseEntry = models.IntegerField(null=True, blank=True, db_column='BaseEntry')  # ID INTERNO DE DOCUMENTO BASE
-    BaseLine = models.IntegerField(null=True, blank=True, db_column='BaseLine')  # NÚMERO DE LÍNEA DEL DOCUMENTO BASE
-    LineStatus = models.CharField(max_length=1, null=True, blank=True, db_column='LineStatus')  # ESTADO DE LÍNEA
-    # Relación con OITM (Artículos)
-    OITM_ItemCode = models.ForeignKey(OITM, on_delete=models.PROTECT, related_name='oitm_rin1', null=True, default=None, db_column='temCode')
-    Dscription = models.CharField(max_length=254, null=True, blank=True, db_column='Dscription')  # DESCRIPCIÓN DEL ARTÍCULO
-    Quantity = models.DecimalField(max_digits=19, decimal_places=6, db_column='Quantity')  # CANTIDAD
-    ShipDate = models.DateTimeField(null=True, blank=True, db_column='ShipDate')  # FECHA DE ENTREGA
-    OpenQty = models.DecimalField(max_digits=19, decimal_places=6, db_column='OpenQty')  # CANTIDAD ABIERTA
-    Price = models.DecimalField(max_digits=19, decimal_places=6, db_column='Price')  # PRECIO UNITARIO
-    Currency = models.CharField(max_length=3, null=True, blank=True, db_column='Currency')  # MONEDA
-    Rate = models.DecimalField(max_digits=19, decimal_places=6, null=True, blank=True, db_column='Rate')  # TIPO DE CAMBIO
-    DiscPrcnt = models.DecimalField(max_digits=19, decimal_places=6, null=True, blank=True, db_column='DiscPrcnt')  # % DE DESCUENTO PARA LA LÍNEA
-    LineTotal = models.DecimalField(max_digits=19, decimal_places=6, db_column='LineTotal')  # TOTAL DE LÍNEA
-    TotalFrgn = models.DecimalField(max_digits=19, decimal_places=6, null=True, blank=True, db_column='TotalFrgn')  # TOTAL EN MONEDA EXTRANJERA
-    OpenSum = models.DecimalField(max_digits=19, decimal_places=6, null=True, blank=True, db_column='OpenSum')  # SALDO ABIERTO
-    OpenSumFC = models.DecimalField(max_digits=19, decimal_places=6, null=True, blank=True, db_column='OpenSumFC')  # SALDO ABIERTO EN MONEDA EXTRANJERA
-    VendorNum = models.CharField(max_length=50, null=True, blank=True, db_column='VendorNum')  # CÓDIGO DE PROVEEDOR
-    SerialNum = models.CharField(max_length=50, null=True, blank=True, db_column='SerialNum')  # NÚMERO DE SERIE
-    WhsCode = models.CharField(max_length=8, null=True, blank=True, db_column='WhsCode')  # CÓDIGO DE ALMACÉN
-    SlpCode = models.IntegerField(null=True, blank=True, db_column='SlpCode')  # CÓDIGO DEL VENDEDOR
-    Commission = models.DecimalField(max_digits=19, decimal_places=6, null=True, blank=True, db_column='Commission')  # COMISIÓN
-    TreeType = models.CharField(max_length=1, null=True, blank=True, db_column='TreeType')  # TIPO DE ÁRBOL
-    AcctCode = models.CharField(max_length=15, null=True, blank=True, db_column='AcctCode')  # CÓDIGO DE CUENTA
-    TaxStatus = models.CharField(max_length=1, null=True, blank=True, db_column='TaxStatus')  # ESTADO DEL IMPUESTO
-    GrossBuyPr = models.DecimalField(max_digits=19, decimal_places=6, null=True, blank=True, db_column='GrossBuyPr')  # PRECIO BRUTO DE COMPRA
-    PriceBefDi = models.DecimalField(max_digits=19, decimal_places=6, null=True, blank=True, db_column='PriceBefDi')  # PRECIO ANTES DE DESCUENTO
-    DocDate = models.DateTimeField(null=True, blank=True, db_column='DocDate')  # FECHA DEL DOCUMENTO
-    Flags = models.IntegerField(null=True, blank=True, db_column='Flags')  # BANDERAS
-    OpenCreQty = models.DecimalField(max_digits=19, decimal_places=6, null=True, blank=True, db_column='OpenCreQty')  # CANTIDAD ABIERTA PARA CRÉDITO
-    UseBaseUn = models.CharField(max_length=1, null=True, blank=True, db_column='UseBaseUn')  # USO DE UNIDAD BASE
-    SubCatNum = models.IntegerField(null=True, blank=True, db_column='SubCatNum')  # SUBCATEGORÍA
-    BaseCard = models.CharField(max_length=15, null=True, blank=True, db_column='BaseCard')  # CÓDIGO BASE
-    TotalSumSy = models.DecimalField(max_digits=19, decimal_places=6, null=True, blank=True, db_column='TotalSumSy')  # TOTAL EN SISTEMA
-    OpenSumSys = models.DecimalField(max_digits=19, decimal_places=6, null=True, blank=True, db_column='OpenSumSys')  # SALDO ABIERTO EN SISTEMA
-    InvntSttus = models.CharField(max_length=1, null=True, blank=True, db_column='InvntSttus')  # ESTADO DEL INVENTARIO
-    OcrCode = models.CharField(max_length=8, null=True, blank=True, db_column='OcrCode')  # CÓDIGO DE CENTRO DE COSTO
-    Project = models.CharField(max_length=20, null=True, blank=True, db_column='Project')  # PROYECTO ASOCIADO
-    CodeBars = models.CharField(max_length=254, null=True, blank=True, db_column='CodeBars')  # CÓDIGO DE BARRAS
-    VatPrcnt = models.DecimalField(max_digits=19, decimal_places=6, null=True, blank=True, db_column='VatPrcnt')  # PORCENTAJE DE IVA
-    VatGroup = models.CharField(max_length=8, null=True, blank=True, db_column='VatGroup')  # GRUPO DE IVA
-    
+    DocEntry = models.ForeignKey(OINV, on_delete=models.PROTECT, related_name='inv1_lines', null=True, default=None, db_column='DocEntry')
+    LineNum = models.IntegerField(db_column='LineNum')
+    TargetType = models.IntegerField(null=True, blank=True, db_column='TargetType')
+    TrgetEntry = models.BigIntegerField(null=True, blank=True, db_column='TrgetEntry')
+    BaseRef = models.CharField(max_length=100, null=True, blank=True, db_column='BaseRef')
+    BaseType = models.IntegerField(null=True, blank=True, db_column='BaseType')
+    BaseEntry = models.BigIntegerField(null=True, blank=True, db_column='BaseEntry')
+    BaseLine = models.IntegerField(null=True, blank=True, db_column='BaseLine')
+    LineStatus = models.CharField(max_length=1, null=True, blank=True, db_column='LineStatus')
+    ItemCode = models.ForeignKey(OITM, on_delete=models.PROTECT, related_name='oitm_inv1', null=True, default=None, db_column='temCode')
+    Dscription = models.CharField(max_length=254, null=True, blank=True, db_column='Dscription')
+    Quantity = models.DecimalField(max_digits=19, decimal_places=6, db_column='Quantity')
+    ShipDate = models.DateTimeField(null=True, blank=True, db_column='ShipDate')
+    OpenQty = models.DecimalField(max_digits=19, decimal_places=6, null=True, blank=True, db_column='OpenQty')
+    Price = models.DecimalField(max_digits=19, decimal_places=6, null=True, blank=True, db_column='Price')
+    Currency = models.CharField(max_length=3, null=True, blank=True, db_column='Currency')
+    Rate = models.DecimalField(max_digits=19, decimal_places=6, null=True, blank=True, db_column='Rate')
+    DiscPrcnt = models.DecimalField(max_digits=19, decimal_places=6, null=True, blank=True, db_column='DiscPrcnt')
+    LineTotal = models.DecimalField(max_digits=19, decimal_places=6, db_column='LineTotal')
+    TotalFrgn = models.DecimalField(max_digits=19, decimal_places=6, null=True, blank=True, db_column='TotalFrgn')
+    OpenSum = models.DecimalField(max_digits=19, decimal_places=6, null=True, blank=True, db_column='OpenSum')
+    OpenSumFC = models.DecimalField(max_digits=19, decimal_places=6, null=True, blank=True, db_column='OpenSumFC')
+    VendorNum = models.CharField(max_length=50, null=True, blank=True, db_column='VendorNum')
+    SerialNum = models.CharField(max_length=50, null=True, blank=True, db_column='SerialNum')
+    WhsCode = models.CharField(max_length=8, null=True, blank=True, db_column='WhsCode')
+    SlpCode = models.IntegerField(null=True, blank=True, db_column='SlpCode')
+    Commission = models.DecimalField(max_digits=19, decimal_places=6, null=True, blank=True, db_column='Commission')
+    TreeType = models.CharField(max_length=1, null=True, blank=True, db_column='TreeType')
+    AcctCode = models.CharField(max_length=15, null=True, blank=True, db_column='AcctCode')
+    TaxStatus = models.CharField(max_length=1, null=True, blank=True, db_column='TaxStatus')
+    GrossBuyPr = models.DecimalField(max_digits=19, decimal_places=6, null=True, blank=True, db_column='GrossBuyPr')
+    PriceBefDi = models.DecimalField(max_digits=19, decimal_places=6, null=True, blank=True, db_column='PriceBefDi')
+    DocDate = models.DateTimeField(null=True, blank=True, db_column='DocDate')
+    Flags = models.IntegerField(null=True, blank=True, db_column='Flags')
+    OpenCreQty = models.DecimalField(max_digits=19, decimal_places=6, null=True, blank=True, db_column='OpenCreQty')
+    UseBaseUn = models.CharField(max_length=1, null=True, blank=True, db_column='UseBaseUn')
+    SubCatNum = models.IntegerField(null=True, blank=True, db_column='SubCatNum')
+    BaseCard = models.CharField(max_length=15, null=True, blank=True, db_column='BaseCard')
+    TotalSumSy = models.DecimalField(max_digits=19, decimal_places=6, null=True, blank=True, db_column='TotalSumSy')
+    OpenSumSys = models.DecimalField(max_digits=19, decimal_places=6, null=True, blank=True, db_column='OpenSumSys')
+    InvntSttus = models.CharField(max_length=1, null=True, blank=True, db_column='InvntSttus')
+    OcrCode = models.CharField(max_length=8, null=True, blank=True, db_column='OcrCode')
+    Project = models.CharField(max_length=20, null=True, blank=True, db_column='Project')
+    CodeBars = models.CharField(max_length=254, null=True, blank=True, db_column='CodeBars')
+    VatPrcnt = models.DecimalField(max_digits=19, decimal_places=6, null=True, blank=True, db_column='VatPrcnt')
+    VatGroup = models.CharField(max_length=8, null=True, blank=True, db_column='VatGroup')
 
     def __str__(self):
         return f"DocEntry: {self.DocEntry}, ItemCode: {self.ItemCode}, LineNum: {self.LineNum}"
+
+
+    
+
+
+class OQUT(models.Model):
+    DocEntry = models.BigIntegerField(primary_key=True, default=0)
+    DocNum = models.IntegerField(db_column='DocNum')
+    DocType = models.CharField(max_length=120)
+    DocDueDate = models.DateTimeField(null=True, blank=True, db_column='DocDueDate')
+    DocTotal = models.DecimalField(max_digits=19, decimal_places=6)
+    VatSum = models.DecimalField(null=True, max_digits=19, decimal_places=6)
+    CardCode = models.ForeignKey(OCRD, on_delete=models.PROTECT, related_name='OQUT_CD', null=True, default=None, db_column='CardCode')
+    DocDate = models.DateTimeField(null=True, auto_now_add=False)
+    DiscPrcnt = models.DecimalField(null=True, max_digits=16, decimal_places=6)
+    ObjType = models.CharField(max_length=120)
+    Series = models.IntegerField(null=True, blank=True, db_column='Series')
+
+    def __str__(self):
+        return str(self.DocEntry)
+    
+    
+    
+    
+class QUT1(models.Model):
+    id = models.AutoField(primary_key=True, default=1)
+    DocEntry = models.ForeignKey(OQUT, on_delete=models.PROTECT, related_name='OQUT_lines', null=True, default=None, db_column='DocEntry')
+    LineNum = models.IntegerField(db_column='LineNum')
+    TargetType = models.IntegerField(null=True, blank=True, db_column='TargetType')
+    TrgetEntry = models.BigIntegerField(null=True, blank=True, db_column='TrgetEntry')
+    BaseRef = models.CharField(max_length=100, null=True, blank=True, db_column='BaseRef')
+    BaseType = models.IntegerField(null=True, blank=True, db_column='BaseType')
+    BaseEntry = models.BigIntegerField(null=True, blank=True, db_column='BaseEntry')
+    BaseLine = models.IntegerField(null=True, blank=True, db_column='BaseLine')
+    LineStatus = models.CharField(max_length=1, null=True, blank=True, db_column='LineStatus')
+    ItemCode = models.ForeignKey(OITM, on_delete=models.PROTECT, related_name='oitm', null=True, default=None, db_column='temCode')
+    Dscription = models.CharField(max_length=254, null=True, blank=True, db_column='Dscription')
+    Quantity = models.DecimalField(max_digits=19, decimal_places=6, null=True, blank=True, db_column='Quantity')
+    ShipDate = models.DateTimeField(null=True, blank=True, db_column='ShipDate')
+    OpenQty = models.DecimalField(max_digits=19, decimal_places=6, null=True, blank=True, db_column='OpenQty')
+    Price = models.DecimalField(max_digits=19, decimal_places=6, db_column='Price')
+    Currency = models.CharField(max_length=3, null=True, blank=True, db_column='Currency')
+    Rate = models.DecimalField(max_digits=19, decimal_places=6, null=True, blank=True, db_column='Rate')
+    DiscPrcnt = models.DecimalField(max_digits=19, decimal_places=6, null=True, blank=True, db_column='DiscPrcnt')
+    LineTotal = models.DecimalField(max_digits=19, decimal_places=6, db_column='LineTotal')
+    TotalFrgn = models.DecimalField(max_digits=19, decimal_places=6, null=True, blank=True, db_column='TotalFrgn')
+    OpenSum = models.DecimalField(max_digits=19, decimal_places=6, null=True, blank=True, db_column='OpenSum')
+    OpenSumFC = models.DecimalField(max_digits=19, decimal_places=6, null=True, blank=True, db_column='OpenSumFC')
+    VendorNum = models.CharField(max_length=50, null=True, blank=True, db_column='VendorNum')
+    SerialNum = models.CharField(max_length=50, null=True, blank=True, db_column='SerialNum')
+    WhsCode = models.CharField(max_length=8, null=True, blank=True, db_column='WhsCode')
+    SlpCode = models.IntegerField(null=True, blank=True, db_column='SlpCode')
+    Commission = models.DecimalField(max_digits=19, decimal_places=6, null=True, blank=True, db_column='Commission')
+    TreeType = models.CharField(max_length=1, null=True, blank=True, db_column='TreeType')
+    AcctCode = models.CharField(max_length=15, null=True, blank=True, db_column='AcctCode')
+    TaxStatus = models.CharField(max_length=1, null=True, blank=True, db_column='TaxStatus')
+    GrossBuyPr = models.DecimalField(max_digits=19, decimal_places=6, null=True, blank=True, db_column='GrossBuyPr')
+    PriceBefDi = models.DecimalField(max_digits=19, decimal_places=6, null=True, blank=True, db_column='PriceBefDi')
+    DocDate = models.DateTimeField(null=True, blank=True, db_column='DocDate')
+    Flags = models.IntegerField(null=True, blank=True, db_column='Flags')
+    OpenCreQty = models.DecimalField(max_digits=19, decimal_places=6, null=True, blank=True, db_column='OpenCreQty')
+    UseBaseUn = models.CharField(max_length=1, null=True, blank=True, db_column='UseBaseUn')
+    SubCatNum = models.IntegerField(null=True, blank=True, db_column='SubCatNum')
+    BaseCard = models.CharField(max_length=15, null=True, blank=True, db_column='BaseCard')
+    TotalSumSy = models.DecimalField(max_digits=19, decimal_places=6, null=True, blank=True, db_column='TotalSumSy')
+    OpenSumSys = models.DecimalField(max_digits=19, decimal_places=6, null=True, blank=True, db_column='OpenSumSys')
+    InvntSttus = models.CharField(max_length=1, null=True, blank=True, db_column='InvntSttus')
+    OcrCode = models.CharField(max_length=8, null=True, blank=True, db_column='OcrCode')
+    Project = models.CharField(max_length=20, null=True, blank=True, db_column='Project')
+    CodeBars = models.CharField(max_length=254, null=True, blank=True, db_column='CodeBars')
+    VatPrcnt = models.DecimalField(max_digits=19, decimal_places=6, null=True, blank=True, db_column='VatPrcnt')
+    VatGroup = models.CharField(max_length=8, null=True, blank=True, db_column='VatGroup')
+
+    def __str__(self):
+        return f"DocEntry: {self.DocEntry}, ItemCode: {self.ItemCode}, LineNum: {self.LineNum}"
+
+
+
+
+
+
+
+class ORDR(models.Model):
+    DocEntry = models.BigIntegerField(primary_key=True, default=0)
+    DocNum = models.IntegerField(db_column='DocNum')
+    DocType = models.CharField(max_length=120)
+    DocDueDate = models.DateTimeField(null=True, blank=True, db_column='DocDueDate')
+    DocTotal = models.DecimalField(max_digits=19, decimal_places=6)
+    VatSum = models.DecimalField(null=True, max_digits=19, decimal_places=6)
+    CardCode = models.ForeignKey(OCRD, on_delete=models.PROTECT, related_name='ORDR_CD', null=True, default=None, db_column='CardCode')
+    DocDate = models.DateTimeField(null=True, auto_now_add=False)
+    DiscPrcnt = models.DecimalField(null=True, max_digits=16, decimal_places=6)
+    ObjType = models.CharField(max_length=120)
+    Series = models.IntegerField(null=True, blank=True, db_column='Series')
+
+    def __str__(self):
+        return str(self.DocEntry)
+
+
+    
+    
+
+class RDR1(models.Model):  # DETALLE DE PEDIDO
+    id = models.AutoField(primary_key=True, default=1)
+    DocEntry = models.ForeignKey(ORDR, on_delete=models.PROTECT, related_name='ORDR_lines', null=True, default=None, db_column='DocEntry')
+    LineNum = models.IntegerField(db_column='LineNum')
+    TargetType = models.IntegerField(null=True, blank=True, db_column='TargetType')
+    TrgetEntry = models.BigIntegerField(null=True, blank=True, db_column='TrgetEntry')
+    BaseRef = models.CharField(max_length=100, null=True, blank=True, db_column='BaseRef')
+    BaseType = models.IntegerField(null=True, blank=True, db_column='BaseType')
+    BaseEntry = models.BigIntegerField(null=True, blank=True, db_column='BaseEntry')
+    BaseLine = models.IntegerField(null=True, blank=True, db_column='BaseLine')
+    LineStatus = models.CharField(max_length=1, null=True, blank=True, db_column='LineStatus')
+    ItemCode = models.ForeignKey(OITM, on_delete=models.PROTECT, related_name='L_oitm', null=True, default=None, db_column='temCode')
+    Dscription = models.CharField(max_length=254, null=True, blank=True, db_column='Dscription')
+    Quantity = models.DecimalField(max_digits=19, decimal_places=6, db_column='Quantity')
+    ShipDate = models.DateTimeField(null=True, blank=True, db_column='ShipDate')
+    OpenQty = models.DecimalField(max_digits=19, decimal_places=6, null=True, blank=True, db_column='OpenQty')
+    Price = models.DecimalField(max_digits=19, decimal_places=6, null=True, blank=True, db_column='Price')
+    Currency = models.CharField(max_length=3, null=True, blank=True, db_column='Currency')
+    Rate = models.DecimalField(max_digits=19, decimal_places=6, null=True, blank=True, db_column='Rate')
+    DiscPrcnt = models.DecimalField(max_digits=19, decimal_places=6, null=True, blank=True, db_column='DiscPrcnt')
+    LineTotal = models.DecimalField(max_digits=19, decimal_places=6, db_column='LineTotal')
+    TotalFrgn = models.DecimalField(max_digits=19, decimal_places=6, null=True, blank=True, db_column='TotalFrgn')
+    OpenSum = models.DecimalField(max_digits=19, decimal_places=6, null=True, blank=True, db_column='OpenSum')
+    OpenSumFC = models.DecimalField(max_digits=19, decimal_places=6, null=True, blank=True, db_column='OpenSumFC')
+    VendorNum = models.CharField(max_length=50, null=True, blank=True, db_column='VendorNum')
+    SerialNum = models.CharField(max_length=50, null=True, blank=True, db_column='SerialNum')
+    WhsCode = models.CharField(max_length=8, null=True, blank=True, db_column='WhsCode')
+    SlpCode = models.IntegerField(null=True, blank=True, db_column='SlpCode')
+    Commission = models.DecimalField(max_digits=19, decimal_places=6, null=True, blank=True, db_column='Commission')
+    TreeType = models.CharField(max_length=1, null=True, blank=True, db_column='TreeType')
+    AcctCode = models.CharField(max_length=15, null=True, blank=True, db_column='AcctCode')
+    TaxStatus = models.CharField(max_length=1, null=True, blank=True, db_column='TaxStatus')
+    GrossBuyPr = models.DecimalField(max_digits=19, decimal_places=6, null=True, blank=True, db_column='GrossBuyPr')
+    PriceBefDi = models.DecimalField(max_digits=19, decimal_places=6, null=True, blank=True, db_column='PriceBefDi')
+    DocDate = models.DateTimeField(null=True, blank=True, db_column='DocDate')
+    Flags = models.IntegerField(null=True, blank=True, db_column='Flags')
+    OpenCreQty = models.DecimalField(max_digits=19, decimal_places=6, null=True, blank=True, db_column='OpenCreQty')
+    UseBaseUn = models.CharField(max_length=1, null=True, blank=True, db_column='UseBaseUn')
+    SubCatNum = models.IntegerField(null=True, blank=True, db_column='SubCatNum')
+    BaseCard = models.CharField(max_length=15, null=True, blank=True, db_column='BaseCard')
+    TotalSumSy = models.DecimalField(max_digits=19, decimal_places=6, null=True, blank=True, db_column='TotalSumSy')
+    OpenSumSys = models.DecimalField(max_digits=19, decimal_places=6, null=True, blank=True, db_column='OpenSumSys')
+    InvntSttus = models.CharField(max_length=1, null=True, blank=True, db_column='InvntSttus')
+    OcrCode = models.CharField(max_length=8, null=True, blank=True, db_column='OcrCode')
+    Project = models.CharField(max_length=20, null=True, blank=True, db_column='Project')
+    CodeBars = models.CharField(max_length=254, null=True, blank=True, db_column='CodeBars')
+    VatPrcnt = models.DecimalField(max_digits=19, decimal_places=6, null=True, blank=True, db_column='VatPrcnt')
+    VatGroup = models.CharField(max_length=8, null=True, blank=True, db_column='VatGroup')
+
+    def __str__(self):
+        return f"DocEntry: {self.DocEntry}, ItemCode: {self.ItemCode}, LineNum: {self.LineNum}"
+
+    
+
+class ORIN(models.Model):  # NOTA DE CRÉDITO (Base)
+    DocEntry = models.BigIntegerField(primary_key=True, default=0)
+    DocNum = models.IntegerField(db_column='DocNum')
+    DocType = models.CharField(max_length=120)
+    DocDueDate = models.DateTimeField(null=True, blank=True, db_column='DocDueDate')
+    DocTotal = models.DecimalField(max_digits=19, decimal_places=6)
+    VatSum = models.DecimalField(null=True, max_digits=19, decimal_places=6)
+    CardCode = models.ForeignKey(OCRD, on_delete=models.PROTECT, related_name='CD', null=True, default=None, db_column='CardCode')
+    DocDate = models.DateTimeField(null=True, auto_now_add=False)
+    DiscPrcnt = models.DecimalField(null=True, max_digits=16, decimal_places=6)
+    ObjType = models.CharField(max_length=120)
+    Series = models.IntegerField(null=True, blank=True, db_column='Series')
+
+    def __str__(self):
+        return str(self.DocEntry)
+        
+
+class RIN1(models.Model):
+    id = models.AutoField(primary_key=True, default=1)
+    DocEntry = models.ForeignKey(ORIN, on_delete=models.PROTECT, related_name='ORIN_lines', null=True, default=None, db_column='DocEntry')
+    LineNum = models.IntegerField(db_column='LineNum')
+    TargetType = models.IntegerField(null=True, blank=True, db_column='TargetType')
+    TrgetEntry = models.BigIntegerField(null=True, blank=True, db_column='TrgetEntry')
+    BaseRef = models.CharField(max_length=100, null=True, blank=True, db_column='BaseRef')
+    BaseType = models.IntegerField(null=True, blank=True, db_column='BaseType')
+    BaseEntry = models.BigIntegerField(null=True, blank=True, db_column='BaseEntry')
+    BaseLine = models.IntegerField(null=True, blank=True, db_column='BaseLine')
+    LineStatus = models.CharField(max_length=1, null=True, blank=True, db_column='LineStatus')
+    ItemCode = models.ForeignKey(OITM, on_delete=models.PROTECT, related_name='LIN_oitm', null=True, default=None, db_column='temCode')
+    Dscription = models.CharField(max_length=254, null=True, blank=True, db_column='Dscription')
+    Quantity = models.DecimalField(max_digits=19, decimal_places=6, null=True, blank=True, db_column='Quantity')
+    ShipDate = models.DateTimeField(null=True, blank=True, db_column='ShipDate')
+    OpenQty = models.DecimalField(max_digits=19, decimal_places=6, null=True, blank=True, db_column='OpenQty')
+    Price = models.DecimalField(max_digits=19, decimal_places=6,null=True, blank=True,  db_column='Price')
+    Currency = models.CharField(max_length=3, null=True, blank=True, db_column='Currency')
+    Rate = models.DecimalField(max_digits=19, decimal_places=6, null=True, blank=True, db_column='Rate')
+    DiscPrcnt = models.DecimalField(max_digits=19, decimal_places=6, null=True, blank=True, db_column='DiscPrcnt')
+    LineTotal = models.DecimalField(max_digits=19, decimal_places=6, db_column='LineTotal')
+    TotalFrgn = models.DecimalField(max_digits=19, decimal_places=6, null=True, blank=True, db_column='TotalFrgn')
+    OpenSum = models.DecimalField(max_digits=19, decimal_places=6, null=True, blank=True, db_column='OpenSum')
+    OpenSumFC = models.DecimalField(max_digits=19, decimal_places=6, null=True, blank=True, db_column='OpenSumFC')
+    VendorNum = models.CharField(max_length=50, null=True, blank=True, db_column='VendorNum')
+    SerialNum = models.CharField(max_length=50, null=True, blank=True, db_column='SerialNum')
+    WhsCode = models.CharField(max_length=8, null=True, blank=True, db_column='WhsCode')
+    SlpCode = models.IntegerField(null=True, blank=True, db_column='SlpCode')
+    Commission = models.DecimalField(max_digits=19, decimal_places=6, null=True, blank=True, db_column='Commission')
+    TreeType = models.CharField(max_length=1, null=True, blank=True, db_column='TreeType')
+    AcctCode = models.CharField(max_length=15, null=True, blank=True, db_column='AcctCode')
+    TaxStatus = models.CharField(max_length=1, null=True, blank=True, db_column='TaxStatus')
+    GrossBuyPr = models.DecimalField(max_digits=19, decimal_places=6, null=True, blank=True, db_column='GrossBuyPr')
+    PriceBefDi = models.DecimalField(max_digits=19, decimal_places=6, null=True, blank=True, db_column='PriceBefDi')
+    DocDate = models.DateTimeField(null=True, blank=True, db_column='DocDate')
+    Flags = models.IntegerField(null=True, blank=True, db_column='Flags')
+    OpenCreQty = models.DecimalField(max_digits=19, decimal_places=6, null=True, blank=True, db_column='OpenCreQty')
+    UseBaseUn = models.CharField(max_length=1, null=True, blank=True, db_column='UseBaseUn')
+    SubCatNum = models.IntegerField(null=True, blank=True, db_column='SubCatNum')
+    BaseCard = models.CharField(max_length=15, null=True, blank=True, db_column='BaseCard')
+    TotalSumSy = models.DecimalField(max_digits=19, decimal_places=6, null=True, blank=True, db_column='TotalSumSy')
+    OpenSumSys = models.DecimalField(max_digits=19, decimal_places=6, null=True, blank=True, db_column='OpenSumSys')
+    InvntSttus = models.CharField(max_length=1, null=True, blank=True, db_column='InvntSttus')
+    OcrCode = models.CharField(max_length=8, null=True, blank=True, db_column='OcrCode')
+    Project = models.CharField(max_length=20, null=True, blank=True, db_column='Project')
+    CodeBars = models.CharField(max_length=254, null=True, blank=True, db_column='CodeBars')
+    VatPrcnt = models.DecimalField(max_digits=19, decimal_places=6, null=True, blank=True, db_column='VatPrcnt')
+    VatGroup = models.CharField(max_length=8, null=True, blank=True, db_column='VatGroup')
+
+    def __str__(self):
+        return f"DocEntry: {self.DocEntry}, ItemCode: {self.ItemCode}, LineNum: {self.LineNum}"
+
+    
     
     
     
 
 class Presupuesto_B1(models.Model):
-    sucursal = models.CharField(max_length=50, db_column='U_Sucursal')  # SUCURSAL
-    linea = models.CharField(max_length=50, db_column='U_Linea')  # LÍNEA
+    sucursal = models.CharField(max_length=50,  null=True, db_column='U_Sucursal')  # SUCURSAL
+    linea = models.CharField(max_length=50, null=True, db_column='U_Linea')  # LÍNEA
     anio = models.IntegerField(db_column='U_Periodo')  
     enero = models.DecimalField(max_digits=19, decimal_places=6, null=True, db_column='U_Enero')  
     febrero = models.DecimalField(max_digits=19, decimal_places=6, null=True, db_column='U_Febrero')  
@@ -466,7 +553,7 @@ class Presupuesto_B1(models.Model):
 
 class HLD1(models.Model): #Feriados
     StrDate = models.DateField(db_column='StrDate') #fecha del feriado 
-    Rmrks = models.CharField(max_length=50, db_column='Rmrks') #nombre del feriado
+    Rmrks = models.CharField(max_length=50, null=True, db_column='Rmrks') #nombre del feriado
     
     def __str__(self):
         return f"{self.StrDate}"
