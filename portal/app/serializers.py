@@ -1,8 +1,7 @@
 from rest_framework import serializers
 from .models import (
     OITM, ORTT, OITW, OWHS, Series, OCRD, INV1, OINV, OQUT, ORDR, RIN1, QUT1, ORIN, RDR1, 
-    Presupuesto_B1, HLD1, Modulos, DetalleModulo, Perfiles, Empleados, Estado, Rel_Perfiles_Modulos
-)
+    Presupuesto_B1, HLD1, Modulos, DetalleModulo, Perfiles, Detalle_usuarios,Usuarios, Estado, Rel_Perfiles_Modulos, OSLP)
 
 class ModulosSerializer(serializers.HyperlinkedModelSerializer): 
     class Meta:
@@ -19,10 +18,18 @@ class PerfilesSerializer(serializers.HyperlinkedModelSerializer):
         model = Perfiles
         fields = ('id_perfil', 'nombre', 'descripcion')
 
-class EmpleadosSerializer(serializers.HyperlinkedModelSerializer):
+class Detalle_usuariosSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
-        model = Empleados
-        fields = ('id_empleado', 'nombre', 'apellido', 'departamento', 'cargo', 'id_perfil')
+        model = Detalle_usuarios
+        fields = ('USERID', 'USER_CODE', 'U_NAME', 'E_Mail', 'Branch', 'BranchName',
+                  'Department', 'DepartmentName' )
+
+class UsuariosSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = Usuarios
+        fields = ('USERID', 'USER_CODE', 'Branch', 'BranchName',
+                  'Department', 'DepartmentName' )
+
 
 class EstadoSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
@@ -177,3 +184,40 @@ class HLD1Serializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = HLD1
         fields = ('StrDate', 'Rmrks')
+
+
+class OSLPSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = OSLP
+        fields = ['SlpCode', 'SlpName', 'Memo', 'Commission', 'GroupCode', 'Locked',
+                 'DataSource', 'UserSign', 'EmpID', 'Active', 'Telephone', 'Mobil',
+                 'Fax', 'Email', 'DPPStatus', 'EncryptIV', 'U_CostoPersona']
+        
+
+# eliminar 
+# class OUSRSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = OUSR
+#         fields = [
+#             'USERID', 'PASSWORD', 'PASSWORD1', 'PASSWORD2', 'INTERNAL_K', 'USER_CODE',
+#             'U_NAME', 'GROUPS', 'PASSWORD4', 'ALLOWENCES', 'SUPERUSER', 'DISCOUNT',
+#             'PASSWORD3', 'Info1File', 'Info1Field', 'Info2File', 'Info2Field', 'Info3File',
+#             'Info3Field', 'Info4File', 'Info4Field', 'dType', 'E_Mail', 'PortNum',
+#             'OutOfOffic', 'SendEMail', 'SendSMS', 'DfltsGroup', 'CashLimit', 'MaxCashSum',
+#             'Fax', 'SendFax', 'Locked', 'Department', 'Branch', 'UserPrefs', 'Language',
+#             'Charset', 'OpenCdt', 'CdtPrvDays', 'DsplyRates', 'AuImpRates', 'OpenDps',
+#             'RcrFlag', 'CheckFiles', 'OpenCredit', 'CreditDay1', 'CreditDay2', 'WallPaper',
+#             'WllPprDsp', 'AdvImagePr', 'ContactLog', 'LastWarned', 'AlertPolFr',
+#             'ScreenLock', 'ShowNewMsg', 'Picture', 'Position', 'Address', 'Country',
+#             'Tel1', 'Tel2', 'GENDER', 'Birthday', 'EnbMenuFlt', 'objType', 'logInstanc',
+#             'userSign', 'createDate', 'userSign2', 'updateDate', 'OneLogPwd', 'lastLogin',
+#             'LastPwds', 'LastPwds2', 'LastPwdSet', 'FailedLog', 'PwdNeverEx', 'SalesDisc',
+#             'PurchDisc', 'LstLogoutD', 'LstLoginT', 'LstLogoutT', 'LstPwdChT',
+#             'LstPwdChB', 'RclFlag', 'MobileUser', 'MobileIMEI', 'PrsWkCntEb',
+#             'SnapShotId', 'STData', 'SupportUsr', 'NoSTPwdNum', 'DomainUser',
+#             'CUSAgree', 'EmailSig', 'TPLId', 'DigCrtPath', 'ShowNewTsk', 'IntgrtEb',
+#             'AllBrnchF', 'EvtNotify', 'IgnDtOwn', 'EnterAsTab', 'DotAsSep', 'MouseOnly',
+#             'Color', 'SkinType', 'Font', 'FontSize', 'NaturalPer', 'DPPStatus',
+#             'AutoAsnBPL', 'EncryptIV', 'HandleEDoc', 'ShowLicBal', 'LicBaHDate',
+#             'U_modelo', 'U_GRUPO', 'U_Stecnico'
+#         ]

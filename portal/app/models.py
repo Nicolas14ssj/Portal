@@ -1,5 +1,5 @@
 from django.db import models
-#from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractUser
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
@@ -35,15 +35,38 @@ class Perfiles(models.Model):
     def __str__(self):
         return self.id_perfil
 
-class Empleados (models.Model): 
-    id_empleado = models.CharField(primary_key = True, max_length =60)
-    nombre = models.CharField(max_length =60)
-    apellido = models.CharField(max_length =60)
-    departamento = models.CharField(max_length =30)
-    perfil = models.ForeignKey(Perfiles, on_delete=models.PROTECT, related_name='empleados', default=1)  
-    def __str__(self):
-        return self.id_empleado 
 
+
+# intermedia entre usuarios y users de django 
+class Detalle_usuarios (models.Model): 
+   USERID = models.SmallIntegerField(null=True, blank=True, db_column='USERID')
+   USER_CODE = models.CharField(max_length=25, db_column='USER_CODE')
+   U_NAME = models.CharField(max_length=155, null=True, blank=True, db_column='U_NAME')
+   E_Mail = models.CharField(max_length=100, null=True, blank=True, db_column='E_Mail')
+   Branch = models.SmallIntegerField(db_column='Branch')
+   BranchName = models.CharField(max_length=20, null=True, blank=True, db_column='BranchName')
+   Department = models.SmallIntegerField(null=True, blank=True, db_column='Department')
+   DepartmentName = models.CharField(max_length=20, db_column='DepartmentName')
+ 
+   def __str__(self):
+        return self.USERID 
+    
+
+class Usuarios (AbstractUser): 
+   USERID = models.SmallIntegerField(null=True, blank=True, db_column='USERID')
+   USER_CODE = models.CharField(max_length=25, db_column='USER_CODE')
+   Branch = models.SmallIntegerField( null=True, blank=True, db_column='Branch')
+   BranchName = models.CharField(max_length=20, null=True, blank=True, db_column='BranchName')
+   Department = models.SmallIntegerField(null=True, blank=True, db_column='Department')
+   DepartmentName = models.CharField(max_length=20, db_column='DepartmentName')
+ 
+   def __str__(self):
+        return self.USERID 
+    
+    
+    
+    
+    
 
 class Estado (models.Model): 
     id_estado = models.CharField(primary_key = True, max_length =30)
@@ -557,6 +580,158 @@ class HLD1(models.Model): #Feriados
     
     def __str__(self):
         return f"{self.StrDate}"
+
+from django.db import models
+
+class OSLP(models.Model): #ejecutivos
+    SlpCode = models.IntegerField(primary_key=True)
+    SlpName = models.CharField(max_length=155)
+    Memo = models.CharField(max_length=50, blank=True, null=True)
+    Commission = models.DecimalField(max_digits=19, decimal_places=6, blank=True, null=True)
+    GroupCode = models.SmallIntegerField(blank=True, null=True)
+    Locked = models.CharField(max_length=1, blank=True, null=True)
+    DataSource = models.CharField(max_length=1, blank=True, null=True)
+    UserSign = models.SmallIntegerField(blank=True, null=True)
+    EmpID = models.IntegerField(blank=True, null=True)
+    Active = models.CharField(max_length=1, blank=True, null=True)
+    Telephone = models.CharField(max_length=20, blank=True, null=True)
+    Mobil = models.CharField(max_length=50, blank=True, null=True)
+    Fax = models.CharField(max_length=20, blank=True, null=True)
+    Email = models.CharField(max_length=100, blank=True, null=True)
+    DPPStatus = models.CharField(max_length=1, blank=True, null=True)
+    EncryptIV = models.CharField(max_length=100, blank=True, null=True)
+    U_CostoPersona = models.IntegerField(blank=True, null=True)
+
+    def __str__(self):
+        return f"{self.SlpCode}"
+
+
+# #eliminar
+# class OUSR(models.Model): #USUARIOS
+#     USERID = models.SmallIntegerField(primary_key=True, db_column='USERID')
+#     PASSWORD = models.CharField(max_length=508, null=True, db_column='PASSWORD')
+#     PASSWORD1 = models.CharField(max_length=16, null=True, db_column='PASSWORD1')
+#     PASSWORD2 = models.CharField(max_length=16, null=True, db_column='PASSWORD2')
+#     INTERNAL_K = models.SmallIntegerField(db_column='INTERNAL_K')
+#     USER_CODE = models.CharField(max_length=50, db_column='USER_CODE')
+#     U_NAME = models.CharField(max_length=310, null=True, db_column='U_NAME')
+#     GROUPS = models.SmallIntegerField(null=True, db_column='GROUPS')
+#     PASSWORD4 = models.CharField(max_length=508, null=True, db_column='PASSWORD4')
+#     ALLOWENCES = models.TextField(null=True, db_column='ALLOWENCES')
+#     SUPERUSER = models.CharField(max_length=1, null=True, db_column='SUPERUSER')
+#     DISCOUNT = models.DecimalField(max_digits=19, decimal_places=6, null=True, db_column='DISCOUNT')
+#     PASSWORD3 = models.CharField(max_length=16, null=True, db_column='PASSWORD3')
+#     Info1File = models.CharField(max_length=8, null=True, db_column='Info1File')
+#     Info1Field = models.SmallIntegerField(null=True, db_column='Info1Field')
+#     Info2File = models.CharField(max_length=8, null=True, db_column='Info2File')
+#     Info2Field = models.SmallIntegerField(null=True, db_column='Info2Field')
+#     Info3File = models.CharField(max_length=8, null=True, db_column='Info3File')
+#     Info3Field = models.SmallIntegerField(null=True, db_column='Info3Field')
+#     Info4File = models.CharField(max_length=8, null=True, db_column='Info4File')
+#     Info4Field = models.SmallIntegerField(null=True, db_column='Info4Field')
+#     dType = models.CharField(max_length=1, null=True, db_column='dType')
+#     E_Mail = models.CharField(max_length=200, null=True, db_column='E_Mail')
+#     PortNum = models.CharField(max_length=100, null=True, db_column='PortNum')
+#     OutOfOffic = models.CharField(max_length=1, null=True, db_column='OutOfOffic')
+#     SendEMail = models.CharField(max_length=1, null=True, db_column='SendEMail')
+#     SendSMS = models.CharField(max_length=1, null=True, db_column='SendSMS')
+#     DfltsGroup = models.CharField(max_length=16, null=True, db_column='DfltsGroup')
+#     CashLimit = models.CharField(max_length=1, null=True, db_column='CashLimit')
+#     MaxCashSum = models.DecimalField(max_digits=19, decimal_places=6, null=True, db_column='MaxCashSum')
+#     Fax = models.CharField(max_length=40, null=True, db_column='Fax')
+#     SendFax = models.CharField(max_length=1, null=True, db_column='SendFax')
+#     Locked = models.CharField(max_length=1, null=True, db_column='Locked')
+#     Department = models.SmallIntegerField(null=True, db_column='Department')
+#     Branch = models.SmallIntegerField(null=True, db_column='Branch')
+#     UserPrefs = models.BinaryField(null=True, db_column='UserPrefs')
+#     Language = models.IntegerField(null=True, db_column='Language')
+#     Charset = models.SmallIntegerField(null=True, db_column='Charset')
+#     OpenCdt = models.CharField(max_length=1, null=True, db_column='OpenCdt')
+#     CdtPrvDays = models.IntegerField(null=True, db_column='CdtPrvDays')
+#     DsplyRates = models.CharField(max_length=1, null=True, db_column='DsplyRates')
+#     AuImpRates = models.CharField(max_length=1, null=True, db_column='AuImpRates')
+#     OpenDps = models.CharField(max_length=1, null=True, db_column='OpenDps')
+#     RcrFlag = models.CharField(max_length=1, null=True, db_column='RcrFlag')
+#     CheckFiles = models.CharField(max_length=1, null=True, db_column='CheckFiles')
+#     OpenCredit = models.CharField(max_length=1, null=True, db_column='OpenCredit')
+#     CreditDay1 = models.SmallIntegerField(null=True, db_column='CreditDay1')
+#     CreditDay2 = models.SmallIntegerField(null=True, db_column='CreditDay2')
+#     WallPaper = models.TextField(null=True, db_column='WallPaper')
+#     WllPprDsp = models.SmallIntegerField(null=True, db_column='WllPprDsp')
+#     AdvImagePr = models.CharField(max_length=1, null=True, db_column='AdvImagePr')
+#     ContactLog = models.CharField(max_length=1, null=True, db_column='ContactLog')
+#     LastWarned = models.DateTimeField(null=True, db_column='LastWarned')
+#     AlertPolFr = models.SmallIntegerField(null=True, db_column='AlertPolFr')
+#     ScreenLock = models.SmallIntegerField(null=True, db_column='ScreenLock')
+#     ShowNewMsg = models.CharField(max_length=1, null=True, db_column='ShowNewMsg')
+#     Picture = models.CharField(max_length=400, null=True, db_column='Picture')
+#     Position = models.CharField(max_length=180, null=True, db_column='Position')
+#     Address = models.CharField(max_length=508, null=True, db_column='Address')
+#     Country = models.CharField(max_length=6, null=True, db_column='Country')
+#     Tel1 = models.CharField(max_length=40, null=True, db_column='Tel1')
+#     Tel2 = models.CharField(max_length=40, null=True, db_column='Tel2')
+#     GENDER = models.CharField(max_length=1, null=True, db_column='GENDER')
+#     Birthday = models.DateTimeField(null=True, db_column='Birthday')
+#     EnbMenuFlt = models.CharField(max_length=1, null=True, db_column='EnbMenuFlt')
+#     objType = models.CharField(max_length=40, null=True, db_column='objType')
+#     logInstanc = models.IntegerField(null=True, db_column='logInstanc')
+#     userSign = models.SmallIntegerField(null=True, db_column='userSign')
+#     createDate = models.DateTimeField(null=True, db_column='createDate')
+#     userSign2 = models.SmallIntegerField(null=True, db_column='userSign2')
+#     updateDate = models.DateTimeField(null=True, db_column='updateDate')
+#     OneLogPwd = models.CharField(max_length=1, null=True, db_column='OneLogPwd')
+#     lastLogin = models.DateTimeField(null=True, db_column='lastLogin')
+#     LastPwds = models.TextField(null=True, db_column='LastPwds')
+#     LastPwds2 = models.CharField(max_length=508, null=True, db_column='LastPwds2')
+#     LastPwdSet = models.DateTimeField(null=True, db_column='LastPwdSet')
+#     FailedLog = models.IntegerField(null=True, db_column='FailedLog')
+#     PwdNeverEx = models.CharField(max_length=1, null=True, db_column='PwdNeverEx')
+#     SalesDisc = models.DecimalField(max_digits=19, decimal_places=6, null=True, db_column='SalesDisc')
+#     PurchDisc = models.DecimalField(max_digits=19, decimal_places=6, null=True, db_column='PurchDisc')
+#     LstLogoutD = models.DateTimeField(null=True, db_column='LstLogoutD')
+#     LstLoginT = models.IntegerField(null=True, db_column='LstLoginT')
+#     LstLogoutT = models.IntegerField(null=True, db_column='LstLogoutT')
+#     LstPwdChT = models.IntegerField(null=True, db_column='LstPwdChT')
+#     LstPwdChB = models.CharField(max_length=16, null=True, db_column='LstPwdChB')
+#     RclFlag = models.CharField(max_length=1, null=True, db_column='RclFlag')
+#     MobileUser = models.CharField(max_length=1, null=True, db_column='MobileUser')
+#     MobileIMEI = models.CharField(max_length=128, null=True, db_column='MobileIMEI')
+#     PrsWkCntEb = models.CharField(max_length=1, null=True, db_column='PrsWkCntEb')
+#     SnapShotId = models.IntegerField(null=True, db_column='SnapShotId')
+#     STData = models.CharField(max_length=80, null=True, db_column='STData')
+#     SupportUsr = models.CharField(max_length=1, null=True, db_column='SupportUsr')
+#     NoSTPwdNum = models.SmallIntegerField(null=True, db_column='NoSTPwdNum')
+#     DomainUser = models.CharField(max_length=100, null=True, db_column='DomainUser')
+#     CUSAgree = models.CharField(max_length=1, null=True, db_column='CUSAgree')
+#     EmailSig = models.TextField(null=True, db_column='EmailSig')
+#     TPLId = models.SmallIntegerField(null=True, db_column='TPLId')
+#     DigCrtPath = models.TextField(null=True, db_column='DigCrtPath')
+#     ShowNewTsk = models.CharField(max_length=1, null=True, db_column='ShowNewTsk')
+#     IntgrtEb = models.CharField(max_length=1, null=True, db_column='IntgrtEb')
+#     AllBrnchF = models.CharField(max_length=1, null=True, db_column='AllBrnchF')
+#     EvtNotify = models.CharField(max_length=1, null=True, db_column='EvtNotify')
+#     IgnDtOwn = models.CharField(max_length=1, null=True, db_column='IgnDtOwn')
+#     EnterAsTab = models.CharField(max_length=1, null=True, db_column='EnterAsTab')
+#     DotAsSep = models.CharField(max_length=1, null=True, db_column='DotAsSep')
+#     MouseOnly = models.CharField(max_length=1, null=True, db_column='MouseOnly')
+#     Color = models.SmallIntegerField(null=True, db_column='Color')
+#     SkinType = models.CharField(max_length=508, null=True, db_column='SkinType')
+#     Font = models.CharField(max_length=100, null=True, db_column='Font')
+#     FontSize = models.IntegerField(null=True, db_column='FontSize')
+#     NaturalPer = models.CharField(max_length=1, null=True, db_column='NaturalPer')
+#     DPPStatus = models.CharField(max_length=1, null=True, db_column='DPPStatus')
+#     AutoAsnBPL = models.CharField(max_length=1, null=True, db_column='AutoAsnBPL')
+#     EncryptIV = models.CharField(max_length=200, null=True, db_column='EncryptIV')
+#     HandleEDoc = models.CharField(max_length=1, null=True, db_column='HandleEDoc')
+#     ShowLicBal = models.CharField(max_length=1, null=True, db_column='ShowLicBal')
+#     LicBaHDate = models.DateTimeField(null=True, db_column='LicBaHDate')
+#     U_modelo = models.CharField(max_length=40, null=True, db_column='U_modelo')
+#     U_GRUPO = models.CharField(max_length=20, null=True, db_column='U_GRUPO')
+#     U_Stecnico = models.CharField(max_length=1, null=True, db_column='U_Stecnico')
+
+#     def __str__(self):
+#         return f"{self.USERID} - {self.USER_CODE}"
+
 
 
 

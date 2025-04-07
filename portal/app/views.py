@@ -1,29 +1,29 @@
 from django.shortcuts import render, redirect
-from .forms import EmpleadoForm
+#from .forms import EmpleadoForm
 from django.contrib import messages
 from rest_framework import viewsets
 from .models import (
     OITM, ORTT, OITW, OWHS, Series, OCRD, INV1, OINV, OQUT, ORDR, RIN1, QUT1, ORIN, RDR1, 
-    Modulos, DetalleModulo, Perfiles, Empleados, Estado, Rel_Perfiles_Modulos, Presupuesto_B1, HLD1
+    Modulos, DetalleModulo, Perfiles, Detalle_usuarios, Usuarios, Estado, Rel_Perfiles_Modulos, Presupuesto_B1, HLD1, OSLP, 
 )
 from .serializers import (
     OITMSerializer, ORTTSerializer, OITWSerializer, OWHSSerializer, SeriesSerializer ,OCRDSerializer, 
     INV1Serializer, OINVSerializer, OQUTSerializer, ORDRSerializer, RIN1Serializer, 
     QUT1Serializer, ORINSerializer, RDR1Serializer, ModulosSerializer, DetalleModuloSerializer, 
-    PerfilesSerializer, EmpleadosSerializer, EstadoSerializer, RelPerfilesModulosSerializer, 
-    PresupuestoB1Serializer, HLD1Serializer
-)
+    PerfilesSerializer, Detalle_usuariosSerializer, UsuariosSerializer, EstadoSerializer, RelPerfilesModulosSerializer, 
+    PresupuestoB1Serializer, HLD1Serializer, OSLPSerializer, 
+    )
 
-def crear_empleado(request):
-    if request.method == 'POST':
-        form = EmpleadoForm(request.POST)
-        if form.is_valid():
-            form.save()  
-            messages.success(request, 'Empleado creado con éxito.')
-            return redirect('crear_empleado.html')  
-    else:
-        form = EmpleadoForm()
-    return render(request, 'crear_empleado.html', {'form': form})
+# def crear_empleado(request):
+#     if request.method == 'POST':
+#         form = EmpleadoForm(request.POST)
+#         if form.is_valid():
+#             form.save()  
+#             messages.success(request, 'Empleado creado con éxito.')
+#             return redirect('crear_empleado.html')  
+#     else:
+#         form = EmpleadoForm()
+#     return render(request, 'crear_empleado.html', {'form': form})
 
 # --- VIEWSETS ---
 # ViewSet para Modulos
@@ -41,11 +41,16 @@ class PerfilesViewsets(viewsets.ModelViewSet):
     queryset = Perfiles.objects.all().order_by('id_perfil')
     serializer_class = PerfilesSerializer
 
-# ViewSet para Empleados
-class EmpleadosViewsets(viewsets.ModelViewSet):
-    queryset = Empleados.objects.all().order_by('id_empleado')
-    serializer_class = EmpleadosSerializer
-
+# ViewSet para Detalle_suarios
+class Detalle_usuariosViewsets(viewsets.ModelViewSet):
+    queryset = Detalle_usuarios.objects.all().order_by('USERID')
+    serializer_class = Detalle_usuariosSerializer
+    
+# ViewSet para Usuarios
+class UsuariosViewsets(viewsets.ModelViewSet):
+    queryset = Usuarios.objects.all().order_by('USERID')
+    serializer_class = UsuariosSerializer
+    
 # ViewSet para Estado
 class EstadoViewsets(viewsets.ModelViewSet):
     queryset = Estado.objects.all().order_by('id_estado')
@@ -136,3 +141,13 @@ class PresupuestoB1Viewsets(viewsets.ModelViewSet):
 class HLD1Viewsets(viewsets.ModelViewSet):
     queryset = HLD1.objects.all().order_by('StrDate')
     serializer_class  = HLD1Serializer
+
+
+class OSLPViewsets(viewsets.ModelViewSet):
+    queryset = OSLP.objects.all().order_by('SlpCode')
+    serializer_class  = OSLPSerializer
+
+
+# class OUSRViewsets(viewsets.ModelViewSet):
+#     queryset = OUSR.objects.all().order_by('USERID')
+#     serializer_class  = OUSRSerializer

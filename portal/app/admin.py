@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 # Register your models here.
-from .models import OITM, ORTT, OITW, OWHS, OCRD, INV1, OINV, OQUT, ORDR, RIN1, QUT1, ORIN, RDR1, Modulos, DetalleModulo, Perfiles, Empleados, Estado, Rel_Perfiles_Modulos
+from .models import OITM, ORTT, OITW, OWHS, OCRD, INV1, OINV, OQUT, ORDR, RIN1, QUT1, ORIN, RDR1, Modulos, DetalleModulo, Perfiles, Detalle_usuarios, Estado, Rel_Perfiles_Modulos
 
 # Registrando todos los modelos para que sean gestionables desde el panel de administración
 admin.site.register(OITM)
@@ -20,7 +20,7 @@ admin.site.register(ORIN)
 admin.site.register(Modulos)
 admin.site.register(DetalleModulo)
 admin.site.register(Perfiles)
-admin.site.register(Empleados)
+admin.site.register(Detalle_usuarios)
 admin.site.register(Estado)
 admin.site.register(Rel_Perfiles_Modulos)
 

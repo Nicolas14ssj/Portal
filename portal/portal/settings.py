@@ -133,7 +133,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
 #vincular emplados con AbstractUser de django 
-#UTH_USER_MODEL = 'app.Empleados'
+AUTH_USER_MODEL = 'app.Usuarios'
 
 
 #python manage.py makemigrations app
