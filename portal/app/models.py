@@ -218,7 +218,7 @@ class OWHS(models.Model):  # maestro de BODEGA
     
     class Meta:
         managed             = True  #quien administra la tabla es el modelo de django
-        db_table            = 'OWHS' # le asignas un nombre a la base
+        db_table            = 'app_owhs' # le asignas un nombre a la base
         verbose_name        = 'Maestro de bodegas'
         verbose_name_plural = 'Maestro de bodegas'
     # en sap existen 3 tipos de negocios los leed que corresponden a algo no especifico, pueden ser clientes o proveedores y los ya mencionados
@@ -567,7 +567,7 @@ class Presupuesto_B1(models.Model):
     diciembre = models.DecimalField(max_digits=19, decimal_places=6, null=True, db_column='U_Diciembre')  
     
     class Meta:
-        db_table = 'PRESUPUESTO_B1'  # Nombre de la tabla en la base de datos
+        db_table = 'app_PRESUPUESTO_B1'  # Nombre de la tabla en la base de datos
     
     def __str__(self):
         return f"{self.sucursal} - {self.linea} - {self.año}"

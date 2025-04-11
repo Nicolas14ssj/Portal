@@ -85,7 +85,21 @@ DATABASES = {
         'OPTIONS': {
             'driver': 'ODBC Driver 17 for SQL Server',  # Asegurar de que este driver esté instalado
         },
+    },
+    
+    'remota': {  # Esta es la conexión al servidor 254
+        'ENGINE': 'mssql',
+        'NAME': 'DATANWO',
+        'USER': 'sa',
+        'PASSWORD': 'mindri',
+        'HOST': '192.9.200.254', 
+        'PORT': '1433',
+        'OPTIONS': {
+            'driver': 'ODBC Driver 17 for SQL Server',
+        },
     }
+    
+
 }
 
 
