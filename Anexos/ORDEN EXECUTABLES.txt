@@ -1,3 +1,5 @@
+--MER
+
 EXEC [dbo].[SYNC_OITM]
 EXEC [dbo].[SYNC_ORTT]
 EXEC [dbo].[SYNC_OITW]
@@ -12,4 +14,14 @@ EXEC [dbo].[SYNC_RDR1]
 EXEC [dbo].[SYNC_ORIN]
 EXEC [dbo].[SYNC_RIN1]
 EXEC [dbo].[SYNC_PRESUPUESTO_B1]
-EXEC [dbo].[SYNC_HDL1]
+EXEC [dbo].[SYNC_HLD1]
+EXEC [dbo].[SYNC_OSLP]
+
+--Usuarios 
+
+EXEC [dbo].[SYNC_USUARIOS_FROM_SAP] --LLENAR Y ACTUALIZAR USUARIOS 
+
+
+
+
+
