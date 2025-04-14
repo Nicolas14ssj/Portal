@@ -1282,7 +1282,7 @@ BEGIN
                 DPPStatus COLLATE DATABASE_DEFAULT AS DPPStatus,
                 EncryptIV COLLATE DATABASE_DEFAULT AS EncryptIV,
                 U_CostoPersona
-            FROM Anwo_Produccion.dbo.OSLP
+            FROM [serv-sap].Anwo_Produccion.dbo.OSLP
 			WHERE LTRIM(RTRIM(ISNULL(Active, ''))) = 'Y'
 
         ) AS source
